@@ -7,12 +7,14 @@ const upload = require('./src/middleware/upload');
 const path = require('path')
 
 const steram = require('./src/middleware/stream')
+const filter = require('./src/middleware/sorting')
 
 
 global.__basedir = __dirname;
 
 app.post("/upload", upload.single('file'), uploadCon.uploadFiles);
-app.use(steram)
+app.use(steram);
+app.use("/filter", filter);
 
 let port = 3000;
 
