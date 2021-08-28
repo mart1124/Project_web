@@ -3,11 +3,12 @@ const router = express.Router();
 const db = require('../models');
 const filterfiles = db.files;
 
-router.get('/', function ( req , res) {
-    let data = req.query.data;
+router.get('/filter', function ( req , res) {
+    let data = req.query.data
+    let name = req.query.name
     filterfiles.findAll({
-        attributes: ['id', 'type', 'name', 'data'],
-        // where: {data: data}
+        attributes: ['id', 'type', 'name', 'data', 'status'],
+        where: {data: data}
     }).then(results => {
         res.status(200).json({
             message: "Succeed",

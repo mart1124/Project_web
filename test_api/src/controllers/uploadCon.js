@@ -5,7 +5,6 @@ const dbFile = db.files;
 
 const uploadFiles = (req , res) => {
     try{
-        console.log(req.file);
         if (req.file == undefined){
             console.log('select file')
         }
@@ -20,9 +19,9 @@ const uploadFiles = (req , res) => {
         dbFile.create({
             type: req.file.mimetype,
             name: req.file.originalname,
-            data: fullUrl
+            data: fullUrl,
+            status: true
         })
-        console.log(__basedir + "/resources/upload/" + req.file.filename)
     } catch(error){
         console.log("ERROR:",error); 
     }
