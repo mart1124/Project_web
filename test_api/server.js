@@ -6,19 +6,24 @@ const uploadCon = require('./src/controllers/uploadCon');
 const upload = require('./src/middleware/upload');
 const path = require('path')
 
-const steram = require('./src/routes/stream')
-const filter = require('./src/routes/sorting')
-const userRoutes = require('./src/routes/userRoutes')
-const home = require('./src/routes/home')
-
+const steram = require('./src/routes/stream');
+const filter = require('./src/routes/sorting');
+const userRoutes = require('./src/routes/userRoutes');
+const home = require('./src/routes/home');
 
 global.__basedir = __dirname;
+
+app.set('views', path.join(__basedir + '/src/', 'views'));
+app.set('view engine', 'ejs');
+app.use(express.urlencoded({ extended: false }))
+app.use(express.json());
+
 
 app.post("/api/upload", upload.single('file'), uploadCon.uploadFiles);
 app.use("/api", steram);
 app.use("/api", filter);
-app.use("/api", userRoutes);
-app.use("/home", home);
+app.use("/admin", userRoutes);
+app.use("/", home);
 
 let port = 3000;
 

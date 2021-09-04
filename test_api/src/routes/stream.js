@@ -5,7 +5,8 @@ const path = require('path');
 
 
 router.get('/upload/*',function (req, res) {
-    const requrl = req.url; 
+    const requrl = req.url 
+    // const requrl = "1629957010589-192.168.1.50_01_20201217144329688_3.mp4"; 
     const filepath = __basedir + "/resources" + requrl ; 
     const stat = fs.statSync(filepath);
     const fileSize = stat.size;

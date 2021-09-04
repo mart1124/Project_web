@@ -23,6 +23,9 @@ module.exports = (sequelize, DataTypes) => {
         idUser: {
             type: DataTypes.STRING,
             allowNull: false,
+        },
+        token: {
+            type: DataTypes.STRING,
         }
     });
     

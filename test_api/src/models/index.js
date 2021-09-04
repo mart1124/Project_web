@@ -1,7 +1,7 @@
 const dbCon = require('../dbCon');
 
 const Sequelize = require('sequelize');
-console.log("เข้า index")
+
 const sequelize = new Sequelize(dbCon.DB, dbCon.USER, dbCon.PASSWORD, {
     host: dbCon.HOST,
     dialect: dbCon.dialect,

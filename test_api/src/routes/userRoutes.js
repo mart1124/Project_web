@@ -12,10 +12,12 @@ const usersMiddleware = require('../middleware/users')
 /* 
     ======== User Register ======== 
 */
+router.get('/register', (req, res) => {
+    res.render('register');
+})
+
 router.post('/register',usersMiddleware.validRegister,  async (req, res) => {
-    const name = req.query.name;
-    const email = req.query.email;
-    const password = req.query.password;
+    const {name, email, password} = req.body;
     
     if (!(name && email && password)) {
         res.status(400).json({
@@ -38,8 +40,8 @@ router.post('/register',usersMiddleware.validRegister,  async (req, res) => {
     };
     // hashCode (เข้ารหัสข้อมูล)
     const salt = await bcrypt.genSalt(10)
-    const hashcode = await bcrypt.hash((email + password), salt)
-    const hashedPassword = await bcrypt.hash(password, salt)
+    const hashcode = await bcrypt.hashSync((email + password), salt)
+    const hashedPassword = await bcrypt.hashSync(password, salt)
 
     // สร้างข้อมูล ใน TB user
     user.create({
@@ -47,7 +49,7 @@ router.post('/register',usersMiddleware.validRegister,  async (req, res) => {
         email: email.toLowerCase(),
         password: hashedPassword,
         permission: 1,
-        idUser: hashcode
+        idUser: hashcode,
     }).then(user => {
         res.status(200).json({
             message: "Users Register Succeed",
@@ -76,33 +78,47 @@ router.post('/register',usersMiddleware.validRegister,  async (req, res) => {
 /* 
     ======== User Login ======== 
 */
-router.post('/login', async (req, res) => {
-    const email = req.query.email;
-    const epass = req.query.email + req.query.password
 
-    const emailcheck = await user.findOne({ where: { email: email } }); //หา email ที่ตรงกันใน database
-    if (!emailcheck) {
-        return res.status(400).json({
-            message: "Email or password is worng",
+router.get('/login', (req,res) => {
+    res.render('login')
+})
+
+router.post('/login', async function(req, res, next){
+    const {email, password} = req.body
+    
+    const epass = email + password
+
+    const users = await user.findOne({ where: { email: email } }); //หา email ที่ตรงกันใน database
+    if (!users) {
+        return res.status(400).render('login'),{
+            message: "Email is worng",
             status: 400
-        });
+        };
     }
-
-    const valididUser = await bcrypt.compare(epass, emailcheck.idUser) //เปรียบเทียบ ค่า ที่ได้จากการ login กับ idUser
+    const autecompare = await auth.findOne({ where: { idUser: users.idUser } });
+    if ( !autecompare || users.idUser !== autecompare.idUser) {
+        return res.status(400).render('login'),{
+            message: "The data in the table does not match.",
+            status: 400
+        };
+    }
+    const valididUser = await bcrypt.compareSync(epass, users.idUser)  //เปรียบเทียบ ค่า ที่ได้จากการ login กับ idUser
     if (!valididUser) {
         return res.status(400).json({
-            message: "invalid email or password",
+            message: "invalid password",
             status: 400
         });
     }
        
-    const token = jwt.sign({ idUser: emailcheck.idUser}, TOKEN_SECRET.secret, {expiresIn: "1d"}); // นำ idUser มา gen jwt Token
-    res.header('auth-token', token) //เอา Token ที่ได้มาเก็บไว้ใน header 
-    return res.status(200).json({
+    const token = jwt.sign({ idUser: users.idUser, name: users.name}, TOKEN_SECRET.secret, {expiresIn: "5m"}); // นำ idUser มา gen jwt Token
+    users.update({token: token})
+    // res.header('auth-token', token) //เอา Token ที่ได้มาเก็บไว้ใน header 
+    return res.header('auth-token', token).redirect(301,'/home'), {
         message: "Login Success",
         token: token,
+        expiresIn: "2h",
         status: 200
-    });
+    }
 
 });
 
