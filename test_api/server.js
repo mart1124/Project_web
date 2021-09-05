@@ -20,12 +20,12 @@ app.use(express.json());
 
 
 app.post("/api/upload", upload.single('file'), uploadCon.uploadFiles);
-app.use("/api", steram);
+app.use("/api/stream", steram);
 app.use("/api", filter);
 app.use("/admin", userRoutes);
 app.use("/", home);
 
-let port = 3000;
+let port = 3001;
 
 db.sequelize.sync();
 

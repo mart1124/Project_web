@@ -8,7 +8,7 @@ const uploadFiles = (req , res) => {
         if (req.file == undefined){
             console.log('select file')
         }
-        var fullUrl = req.protocol + '://' + req.get('host') + req.originalUrl + "/" + req.file.filename;
+        var fullUrl = req.protocol + '://' + req.get('host') + "/api/stream/" + req.file.filename;
         res.json({
             massage: "OK",
             statusCode: 200,
