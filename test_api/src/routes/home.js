@@ -9,9 +9,9 @@ router.get('/', (req, res) => {
 });
 
 router.get('/home', velifytoken , (req, res) => {
-    return res.render('home'), {
+    return res.json({
         massage: "Admin_HomePage"
-    }
+    })
 });
 
 module.exports = router;

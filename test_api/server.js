@@ -9,6 +9,7 @@ const steram = require('./src/routes/stream');
 const filter = require('./src/routes/sorting');
 const userRoutes = require('./src/routes/userRoutes');
 const home = require('./src/routes/home');
+var cors = require('cors')
 
 global.__basedir = __dirname;
 
@@ -16,13 +17,8 @@ app.set('views', path.join(__basedir + '/src/', 'views'));
 app.set('view engine', 'ejs');
 app.use(express.urlencoded({ extended: false }))
 app.use(express.json());
-app.use(function(req, res, next) {
-    res.header("Access-Control-Allow-Origin", "*");
-    res.header("Access-Control-Allow-Headers", "X-Requested-With");
-    next();
-});
+app.use(cors())
 
-// app.disable('etag');
 app.post("/api/upload", upload.single('file'), uploadCon.uploadFiles);
 app.use("/api/stream", steram);
 app.use("/api", filter);

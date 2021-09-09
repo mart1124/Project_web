@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { Nevbar } from './nevbar';
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
-import { Row, Col, Table } from 'react-bootstrap'
 import Tableshow from './Tableshow';
 import axios from 'axios'
 
