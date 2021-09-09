@@ -13,8 +13,8 @@ const home = require('./src/routes/home');
 
 global.__basedir = __dirname;
 
-app.set('views', path.join(__basedir + '/src/', 'views'));
-app.set('view engine', 'ejs');
+app.set('componants', path.join(__basedir + '/client/webapp/src', 'componants'));
+app.set('view engine', 'js');
 app.use(express.urlencoded({ extended: false }))
 app.use(express.json());
 

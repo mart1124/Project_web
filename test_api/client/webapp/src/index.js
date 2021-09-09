@@ -1,8 +1,15 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import App from './App';
-import { Nevbar } from './componants/nevbar';
+import './index.css';
+import 'bootstrap/dist/css/bootstrap.min.css';
 
-const myfirstelement = <h1>Home Page</h1>
 
-ReactDOM.render(<App />, document.getElementById('root'));
+
+
+ReactDOM.render(
+    <React.StrictMode>
+    <App />
+    </React.StrictMode>, 
+    document.getElementById('root')
+    );

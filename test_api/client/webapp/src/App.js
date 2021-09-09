@@ -1,12 +1,21 @@
 import './App.css';
-import { Nevbar } from './componants/nevbar';
+import { BrowserRouter as Router, Route, Switch} from 'react-router-dom'
+import Loginform from './componants/Loginform';
+import Register from './componants/Register';
+import Home from './componants/Home';
+import Sorting from './componants/Sorting';
+import 'bootstrap/dist/css/bootstrap.min.css';
 
-function App() {
+function App()  {
   return (
-    <div className="App conteiner">
-     < Nevbar />
-     <h1>Home Page</h1>
-    </div>
+    <Router>
+      <Switch>
+        <Route exact path="/" component= {Home} />
+        <Route exact path="/admin/login" component={Loginform}/>
+        <Route exact path="/admin/register" component= {Register} />
+        <Route exact path="/api/filter" component= {Sorting} />
+      </Switch>
+    </Router>
   );
 }
 

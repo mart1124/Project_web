@@ -16,7 +16,7 @@ router.get('/register', (req, res) => {
     res.render('register');
 })
 
-router.post('/register',usersMiddleware.validRegister,  async (req, res) => {
+router.post('/register', usersMiddleware.validRegister,  async (req, res) => {
     const {name, email, password} = req.body;
     
     if (!(name && email && password)) {
@@ -90,7 +90,7 @@ router.post('/login', async function(req, res, next){
 
     const users = await user.findOne({ where: { email: email } }); //หา email ที่ตรงกันใน database
     if (!users) {
-        return res.status(400).render('login'),{
+        return res.status(400).render('loginform'),{
             message: "Email is worng",
             status: 400
         };
