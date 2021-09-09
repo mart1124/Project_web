@@ -4,7 +4,7 @@ import Loginform from './componants/Loginform';
 import Register from './componants/Register';
 import Home from './componants/Home';
 import Sorting from './componants/Sorting';
-import 'bootstrap/dist/css/bootstrap.min.css';
+
 
 function App()  {
   return (

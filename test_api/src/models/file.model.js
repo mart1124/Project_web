@@ -1,5 +1,5 @@
 module.exports = (sequelize, DataTypes) => {
-    const filesStorage = sequelize.define("fileStorage",{
+    const filesStorage = sequelize.define("fileStorages",{
         type: {
             type: DataTypes.STRING,
             allowNull: false,
@@ -15,7 +15,7 @@ module.exports = (sequelize, DataTypes) => {
         status: {
             type: DataTypes.BOOLEAN,
             allowNull: false,
-        }
+        },
     });
     
     return filesStorage;

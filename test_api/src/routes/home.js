@@ -4,7 +4,7 @@ const velifytoken = require('./verifyToken');
 
 router.get('/', (req, res) => {
     return res.render('home'), {
-        massage: "HomePage"
+        massage: "HomePage asdasdsdsd"
     }
 });
 

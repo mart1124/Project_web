@@ -12,9 +12,6 @@ const usersMiddleware = require('../middleware/users')
 /* 
     ======== User Register ======== 
 */
-router.get('/register', (req, res) => {
-    res.render('register');
-})
 
 router.post('/register', usersMiddleware.validRegister,  async (req, res) => {
     const {name, email, password} = req.body;
@@ -90,17 +87,17 @@ router.post('/login', async function(req, res, next){
 
     const users = await user.findOne({ where: { email: email } }); //หา email ที่ตรงกันใน database
     if (!users) {
-        return res.status(400).render('loginform'),{
+        return res.status(400).json({
             message: "Email is worng",
             status: 400
-        };
+        });
     }
     const autecompare = await auth.findOne({ where: { idUser: users.idUser } });
     if ( !autecompare || users.idUser !== autecompare.idUser) {
-        return res.status(400).render('login'),{
+        return res.status(400).json({
             message: "The data in the table does not match.",
             status: 400
-        };
+        });
     }
     const valididUser = await bcrypt.compareSync(epass, users.idUser)  //เปรียบเทียบ ค่า ที่ได้จากการ login กับ idUser
     if (!valididUser) {
@@ -112,13 +109,13 @@ router.post('/login', async function(req, res, next){
        
     const token = jwt.sign({ idUser: users.idUser, name: users.name}, TOKEN_SECRET.secret, {expiresIn: "5m"}); // นำ idUser มา gen jwt Token
     users.update({token: token})
-    // res.header('auth-token', token) //เอา Token ที่ได้มาเก็บไว้ใน header 
-    return res.header('auth-token', token).redirect(301,'/home'), {
+    res.header('auth-token', token) //เอา Token ที่ได้มาเก็บไว้ใน header 
+    return res.json({
         message: "Login Success",
         token: token,
         expiresIn: "2h",
         status: 200
-    }
+    })
 
 });
 

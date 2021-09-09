@@ -2,11 +2,8 @@ import React, {useState, useEffect} from 'react'
 import * as ReactBootStrap from 'react-bootstrap'
 import axios from 'axios'
 
-function Tableshow ({data}) {
-    const test = data
-    console.log(test)
+function Tableshow ({listVideo}) {
     return (
-        // <span>{JSON.stringify(test)}</span>
         <ReactBootStrap.Table striped bordered hover>
             <thead>
                 <tr>
@@ -18,7 +15,7 @@ function Tableshow ({data}) {
             </thead>
             <tbody>
                 {
-                    test && test.map((item) => (
+                    listVideo.data && listVideo.data.map((item) => (
                         <tr key={item.id}>
                         <td>{item.id}</td>
                         <td>{item.type}</td>

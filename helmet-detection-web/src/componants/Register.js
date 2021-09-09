@@ -1,13 +1,13 @@
 import React from 'react'
 import { Nevbar } from './nevbar'
-import 'bootstrap/dist/css/bootstrap.min.css';
+
 
 const Register = props => {
     return (
         <div className="App conteiner">
             < Nevbar />   
             <h1>Register Page</h1>
-            <form action="" method="post">
+            <form action="http://localhost:3001/api/register" method="POST">
                 <div className="form-group row">
                     <div className="mb3 mt-2">
                         <label htmlFor="name">Name</label>
