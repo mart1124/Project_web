@@ -2,8 +2,8 @@ const jwt = require('jsonwebtoken');
 const TOKEN_SECRET = require('../config/auth.config')
 
 module.exports = function (req, res, next){
-    console.log(req.header('auth-token'))
-    const token = req.header('auth-token');
+    console.log(req.header('Authorization'))
+    const token = req.header('Authorization');
     if (!token) return res.status(401).json({
         message: "Access Donied",
         status: 401

@@ -1,31 +1,45 @@
 import React, {useState, useEffect} from 'react'
-import * as ReactBootStrap from 'react-bootstrap'
+// import * as ReactBootStrap from 'react-bootstrap'
 import axios from 'axios'
+import { makeStyles } from '@material-ui/core/styles';
+import {Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper } from '@material-ui/core';
+
+const useStyles = makeStyles({
+    table: {
+      minWidth: 650,
+    },
+  });
 
 function Tableshow ({listVideo}) {
+    const classes = useStyles();
     return (
-        <ReactBootStrap.Table striped bordered hover>
-            <thead>
-                <tr>
-                <th>ID</th>
-                <th>Type</th>
-                <th>Name</th>
-                <th>Url</th>
-                </tr>
-            </thead>
-            <tbody>
-                {
-                    listVideo.data && listVideo.data.map((item) => (
-                        <tr key={item.id}>
-                        <td>{item.id}</td>
-                        <td>{item.type}</td>
-                        <td>{item.name}</td>
-                        <td>{item.data}</td>
-                        </tr>
-                    ))
-                }
-            </tbody>
-        </ReactBootStrap.Table>
+
+    <TableContainer component={Paper} square = "true">
+    <Table className={classes.table} aria-label="Video table">
+        <TableHead>
+        <TableRow >
+            <TableCell align="">ID</TableCell>
+            <TableCell align="left">Type</TableCell>
+            <TableCell align="left">Name</TableCell>
+            <TableCell align="left">Url form streaming</TableCell>
+        </TableRow>
+        </TableHead>
+        <TableBody>
+            {
+                listVideo.data && listVideo.data.map((item) => (
+                    <TableRow key={item.id}>
+                        <TableCell component="th" scope="row">
+                        {item.id}
+                        </TableCell>
+                        <TableCell >{item.type}</TableCell>
+                        <TableCell >{item.name}</TableCell>
+                        <TableCell >{item.data}</TableCell>
+                    </TableRow>
+                ))
+            }
+        </TableBody>
+    </Table>
+    </TableContainer>
     )
 }
 
