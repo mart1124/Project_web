@@ -4,21 +4,27 @@ const db = require('./src/models');
 const uploadCon = require('./src/controllers/uploadCon');
 const upload = require('./src/middleware/upload');
 const path = require('path')
+const cookieParser = require('cookie-parser')
+const session = require('express-session')
 
 const steram = require('./src/routes/stream');
 const filter = require('./src/routes/sorting');
 const userRoutes = require('./src/routes/userRoutes');
 const home = require('./src/routes/home');
+const velifytoken = require('./src/middleware/verifyToken'); 
 var cors = require('cors')
 
 global.__basedir = __dirname;
 
 app.set('views', path.join(__basedir + '/src/', 'views'));
 app.set('view engine', 'ejs');
-app.use(express.urlencoded({ extended: false }))
+app.use(express.urlencoded({ extended: false }));
 app.use(express.json());
-app.use(cors())
+app.use(cors());
+app.use(cookieParser());
 
+
+app.post("/upload-config", uploadCon.uploadConfig);
 app.post("/api/upload", upload.single('file'), uploadCon.uploadFiles);
 app.use("/api/stream", steram);
 app.use("/api", filter);

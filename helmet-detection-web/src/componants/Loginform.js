@@ -1,11 +1,13 @@
 import React from 'react';
-import { Nevbar } from './nevbar';
+import { useHistory } from "react-router-dom";
 import { useEffect, useState } from 'react';
 import axios from 'axios'
 import { Button, Container, CssBaseline, TextField,
     Paper, Grid, Link, Typography} from '@material-ui/core';
+// import Alert from '@material-ui/lab/Alert';
 import { makeStyles, createTheme  } from '@material-ui/core/styles';
 
+// axios.defaults.withCredentials = true;
 
 const useStyles = makeStyles((theme) => ({
     root: {
@@ -56,13 +58,33 @@ const Loginform = props => {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [error, setError] = useState("");
+    const [loginstatus, setLoginstatus] = useState(false);
     const classes = useStyles();
+    const history = useHistory();
     function userLogin(){
         axios
             .post("http://localhost:3001/api/login", { email: email, password: password }, { validateStatus: function (status) {
                 return status < 500; // Reject only if the status code is greater than or equal to 500
               } })
             .then(response => {
+                console.log(response.data.token)
+                if (response.status == 200 && response.data.auth == true){
+                    setLoginstatus(true)
+                    // let path = `/`; 
+                    // history.push(path); 
+                    console.log(response)
+                    axios('http://localhost:3001/home', { 
+                        // withCredentials: true ,
+                        headers: {
+                            Authorization: response.data.token
+                        }
+                    }).then((res) => {
+                        let path = `/`; 
+                        history.push(path); 
+                       console.log(res) 
+                    })
+                  }
+                
                 if (response.status == 400){
                   console.log("response: ", response.data)  
                 }
@@ -122,99 +144,12 @@ const Loginform = props => {
                             Create a new Account ? 
                         </Link>
                     </Typography>
+                    {/* <Alert severity="error">This is an error alert — check it out!</Alert> */}
                 </Paper>
             </div>
         </Container>
-        
-        // <div className="App conteiner">
-        //     < Nevbar />
-        //     <div className="card">
-        //         <h1>Login</h1>
-        //         <div className="card-body"> 
-        //         <label> Username </label>
-        //         <br />
-        //         <input 
-        //             type="email" 
-        //             placeholder="Email" 
-        //             value={email} 
-        //             onChange={(e) => {setEmail(e.target.value)}} /> 
-        //         <br />
-        //         <label> Password </label>
-        //         <br />
-        //         <input 
-        //             type="password" 
-        //             name="password" 
-        //             placeholder="password" 
-        //             value={password} 
-        //             onChange={(e) => {setPassword(e.target.value)}} 
-        //             />
-                    
-        //         <br />   
-        //         <button onClick={() => {
-        //            userLogin()
-        //         }}>Login</button>
-        //     </div>
-        
-        //     </div>
-        // </div>
+    
     )
 }
 
 export default Loginform;
-
-
-{/* <Container component="main" maxWidth="xs">
-<div className={classes.root}>
-<CssBaseline />
-<div className={classes.paper}>
-    <Typography component="h1" variant="h5">
-        Sign in
-    </Typography>
-    <form className={classes.form} noValidate>
-    <TextField
-        variant="outlined"
-        margin="normal"
-        required
-        // fullWidth
-        id="email"
-        label="Email Address"
-        name="email"
-        autoComplete="email"
-        autoFocus
-    />
-    <TextField
-        variant="outlined"
-        margin="normal"
-        required
-        fullWidth
-        name="password"
-        label="Password"
-        type="password"
-        id="password"
-        autoComplete="current-password"
-    />
-    <Box textAlign='center'>
-        <Button
-            type="submit"
-            maxWidth="md"
-            variant="contained"
-            color="primary"
-            className={classes.submit}
-        >
-            Sign In
-        </Button>
-        <hr />
-        <Button
-            href = "/admin/register"
-            fullWidth
-            variant="contained"
-            color="primary"
-        >
-            Register
-        </Button>
-        <hr />
-    </Box>
-    </form>
-</div>
-</div>
-</Container> */}

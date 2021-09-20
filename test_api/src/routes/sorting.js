@@ -2,29 +2,41 @@ const express = require('express');
 const router = express.Router();
 const db = require('../models');
 const filterfiles = db.files;
-const { Op } = require("sequelize");
+const { Op, Sequelize } = require("sequelize");
 
 // GET เอาไว้ เรียกข้อมูลไปแสดง และ ค้นหาข้อมูล
-router.get('/filter', function ( req, res) {
+router.get('/filter', function ( req, res ) {
     const startdate = req.query.startDate;
-    const enddate = req.query.endDate
-    console.log("เข้า get =",startdate, enddate)
-    
-    if(startdate && enddate){
-      console.log("เข้า if =",startdate, enddate)
+    const enddate = req.query.endDate;
+    const selectinput = req.query.selectInput;
+    console.log(startdate, enddate, selectinput)
+    if(startdate && enddate && selectinput){
+      console.log("เข้า if =",startdate, enddate, selectinput)
       filterfiles.findAll({
-        attributes: ['id', 'type', 'name', 'data'],
+        // [Sequelize.fn('SUM', Sequelize.col('helmet_count')), 'helmet_count'],
+        // [Sequelize.fn('SUM', Sequelize.col('not_helmet_count')), 'not_helmet_count'],
+        attributes: ['id', 'type', 'name', 'data', 'helmet_count', 'not_helmet_count'],
         where: {
           createdAt: {
             [Op.between]: [startdate ,enddate]
-          }
+          },
+        // order: [[Sequelize.literal("createdOn"), 'ASC']],
+        // group: 'createdAt'
         },
     }).then(data => {
-        res.status(200).json({
-            data
-        });
+        filterfiles.findAll({
+            attributes: [
+              [Sequelize.fn('SUM', Sequelize.col('helmet_count')), 'helmet_count'],
+              [Sequelize.fn('SUM', Sequelize.col('not_helmet_count')), 'not_helmet_count']
+            ],
+        }).then(sumcount => {
+            res.status(200).json({
+                data,
+                sumcount
+            });
+        })
       })
-      . catch(error => {
+      .catch(error => {
           console.log(error);
           res.status(500).json({
             message: "Error!",
@@ -35,9 +47,17 @@ router.get('/filter', function ( req, res) {
     filterfiles.findAll({
         attributes: ['id', 'type', 'name', 'data'],
     }).then(data => {
-        res.status(200).json({
-            data
-        });
+        filterfiles.findAll({
+          attributes: [
+            [Sequelize.fn('SUM', Sequelize.col('helmet_count')), 'helmet_count'],
+            [Sequelize.fn('SUM', Sequelize.col('not_helmet_count')), 'not_helmet_count']
+          ],
+      }).then(sumcount => {
+          res.status(200).json({
+            data,
+            sumcount
+          });
+      })
       })
       . catch(error => {
           console.log(error);
@@ -54,7 +74,7 @@ router.get('/filter', function ( req, res) {
 router.post('/filter', function ( req , res) {
   const name = req.body.test;
   const datess = req.body.startdate;
-  console.log(name, datess)
+  
   if (name){
     console.log("เข้า")
     filterfiles.findAll({

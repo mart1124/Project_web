@@ -6,6 +6,7 @@ const db = require('../models');
 const TOKEN_SECRET = require('../config/auth.config')
 const user = db.users;
 const auth = db.auth;
+const cookieParser = require('cookie-parser')
 
 const usersMiddleware = require('../middleware/users')
 
@@ -77,25 +78,26 @@ router.post('/register', usersMiddleware.validRegister,  async (req, res) => {
 */
 
 router.get('/login', async function(req, res, next){
-    console.log(req.body)
     const {email, password} = req.body
     console.log(email,password)
-    res.header('Access-Control-Allow-Origin', 'http://localhost:3600');
     res.json({
         massage: "Login Success"
     })
 })
 
 router.post('/login', async function(req, res, next){
-    // return res.status(200).json({
-    //     massage: "เข้า"
-    // })
+    // token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZFVzZXIiOiIkMmEkMTAkVUpFUGo3MUdFUzY3aTJob2E1UEJRLkp6WFFkTTBhRm1hL3hMVkF2RjlLR0VSeGpaaHJZa0MiLCJuYW1lIjoiMTIzNCIsImlhdCI6MTYzMDc0MjYzNCwiZXhwIjoxNjMwNzQyOTM0fQ.REPVP1vE-gAl8posZpOeYiCFBBbpt500KLn-qcOPv_A"
+    // res
+    //     .cookie("Authorization", token, {path: '/home', httpOnly: true})
+    //     .json({ auth: true, token: token })
+
     const {email, password} = req.body
     const epass = email + password
 
     const users = await user.findOne({ where: { email: email } }); //หา email ที่ตรงกันใน database
     if (!users) {
         return res.status(400).json({
+            auth: false,
             message: "Email is worng",
             status: 400
         });
@@ -103,6 +105,7 @@ router.post('/login', async function(req, res, next){
     const autecompare = await auth.findOne({ where: { idUser: users.idUser } });
     if ( !autecompare || users.idUser !== autecompare.idUser) {
         return res.status(400).json({
+            auth: false,
             message: "The data in the table does not match.",
             status: 400
         });
@@ -110,6 +113,7 @@ router.post('/login', async function(req, res, next){
     const valididUser = await bcrypt.compareSync(epass, users.idUser)  //เปรียบเทียบ ค่า ที่ได้จากการ login กับ idUser
     if (!valididUser) {
         return res.status(400).json({
+            auth: false,
             message: "invalid password",
             status: 400
         });
@@ -118,12 +122,19 @@ router.post('/login', async function(req, res, next){
     const token = jwt.sign({ idUser: users.idUser, name: users.name}, TOKEN_SECRET.secret, {expiresIn: "5m"}); // นำ idUser มา gen jwt Token
     users.update({token: token})
     res.header('Authorization', token) //เอา Token ที่ได้มาเก็บไว้ใน header 
-    return res.json({
-        message: "Login Success",
-        token: token,
-        expiresIn: "2h",
-        status: 200
-    })
+    return res
+        .cookie("Authorization", token, {
+            expiresIn: 60 * 60 * 24,
+            httpOnly: true,
+        })
+        .status(200)
+        .json({
+            auth: true,
+            message: "Login Success",
+            token: token,
+            expiresIn: "2h",
+            status: 200
+         })
 
 });
 

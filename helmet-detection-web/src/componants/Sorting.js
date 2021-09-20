@@ -48,15 +48,19 @@ const Sorting = props => {
     const [tebleData, setTebleData] = useState([]);
     const [error, setError] = useState(null);
     const [isLoaded, setIsLoaded] = useState(false);
-    const [period, setPeriod] = useState("");
+    const [selectInput, setSelectInput] = useState("");
+    const [sumCount, setSumCount] = useState("");
 
     const classes = useStyles();
     
 
     const fetchData = async () => {
             const { data} = await axios('http://localhost:3001/api/filter');
-            setTebleData(data)
-            setIsLoaded(true)
+            console.log(data.sumcount);
+            // setSumCount(data.sumcount);
+            // console.log(sumCount);
+            setTebleData(data);
+            setIsLoaded(true);
             setError(error);
         }
     useEffect(() => {
@@ -69,10 +73,12 @@ const Sorting = props => {
         axios({
             method: 'get',
             url: 'http://localhost:3001/api/filter',
-            params: {startDate, endDate}
+            params: {startDate, endDate, selectInput}
           })
             .then(response => {
+                console.log(response)
                 setTebleData(response.data)
+                setSumCount(response.data.sumcount[0])
             })
             .catch(err => {
               console.error(err)
@@ -90,9 +96,9 @@ const Sorting = props => {
                     <Typography className={classes.Box}> Select your function: </Typography>
                     <Select
                         id="demo-customized-select"
-                        value={period}
+                        value={selectInput}
                         className={classes.mp}
-                        onChange={(e) => {setPeriod(e.target.value)}}
+                        onChange={(e) => {setSelectInput(e.target.value)}}
                         >
                         <MenuItem value="">
                             <em>None</em>
@@ -119,10 +125,10 @@ const Sorting = props => {
                     </Box>
                     <Box className={classes.Box}>
                         <DatePicker
-                            name="startdate"
+                            name="enddate"
                             todayButton="ToDay" 
-                            selected={startDate} 
-                            onChange={(date) => setStartDate(date)}
+                            selected={endDate} 
+                            onChange={(date) => setEndDate(date)}
                             showTimeSelect
                             timeFormat="HH:mm"
                             timeIntervals={15}
@@ -138,84 +144,19 @@ const Sorting = props => {
                             onClick={() => {
                                 getVideoFilter()
                             }}>ค้นหา</Button>
-                        </Box>
+                    </Box>
                 </Box>
-                {/* <Grid className={classes.Paper} container item xs={12} component = {Paper} square = "true" >
-                    <Grid container item xs={3}>
-                        <DatePicker
-                            name="startdate"
-                            todayButton="ToDay" 
-                            selected={startDate} 
-                            onChange={(date) => setStartDate(date)}
-                            showTimeSelect
-                            timeFormat="HH:mm"
-                            timeIntervals={15}
-                            timeCaption="time"
-                            dateFormat="yyyy-MM-dd HH:mm"
-                            showMonthDropdown />
-                        <h4>TO</h4>
-                    </Grid>
-                    
-                    <Grid container item xs={3}>
-                    <DatePicker 
-                        name="enddate"
-                        todayButton="ToDay"
-                        selected={endDate} 
-                        onChange={(date) => setEndDate(date)}
-                        showTimeSelect
-                        timeFormat="HH:mm"
-                        timeIntervals={15}
-                        timeCaption="time"
-                        dateFormat="yyyy-MM-dd HH:mm"
-                        showMonthDropdown /> 
-                    </Grid>
-                    <Grid container item xs={3}>
-                        <button onClick={() => {
-                            getVideoFilter()
-                        }}>ค้นหา</button>
-                    </Grid>
-                    
-                </Grid> */}
+                
+                <Box component={Paper} display="flex"  square = "true" alignItems="center">
+                    <Typography className={classes.Box}> Wear a helmet: {sumCount} </Typography>
+                    <Typography className={classes.Box}> Not wear a helmet: {sumCount} </Typography>
+                </Box>
                 <Grid className={classes.grid} container item xs={12} >
                     < Tableshow listVideo={tebleData}/>
                 </Grid>
               
         </div>
         </Container>
-        // <div className="App">
-        //     <div>Test Data</div>
-        //     <div>
-        //     <DatePicker
-        //         name="startdate"
-        //         todayButton="ToDay" 
-        //         selected={startDate} 
-        //         onChange={(date) => setStartDate(date)}
-        //         showTimeSelect
-        //         timeFormat="HH:mm"
-        //         timeIntervals={15}
-        //         timeCaption="time"
-        //         dateFormat="yyyy-MM-dd HH:mm"
-        //         showMonthDropdown />
-        //     <h4>TO</h4>
-        //     <DatePicker 
-        //         name="enddate"
-        //         todayButton="ToDay"
-        //         selected={endDate} 
-        //         onChange={(date) => setEndDate(date)}
-        //         showTimeSelect
-        //         timeFormat="HH:mm"
-        //         timeIntervals={15}
-        //         timeCaption="time"
-        //         dateFormat="yyyy-MM-dd HH:mm"
-        //         showMonthDropdown /> 
-        //     <button onClick={() => {
-        //         getVideoFilter()
-        //     }}>ค้นหา</button>
-            // </div>
-            // <div>
-            //     < Tableshow listVideo={tebleData}/>
-            // </div>
-        // </div>
     )
 }
 

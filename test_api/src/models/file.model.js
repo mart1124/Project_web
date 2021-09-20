@@ -12,6 +12,12 @@ module.exports = (sequelize, DataTypes) => {
             type: DataTypes.STRING,
             allowNull: false,
         },
+        helmet_count: {
+            type: DataTypes.INTEGER
+        },
+        not_helmet_count: {
+            type: DataTypes.INTEGER
+        },
         status: {
             type: DataTypes.BOOLEAN,
             allowNull: false,
