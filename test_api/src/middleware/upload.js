@@ -3,10 +3,15 @@ const path = require('path')
 
 let fileStorageEngine =  multer.diskStorage({
     destination: function (req, file, cb) {
-        cb(null, __basedir + "/resources/upload/");
+        if (file.mimetype == 'image/jpeg'){
+            cb(null, __basedir + "/resources/upload/img/");
+        } else {
+            cb(null, __basedir + "/resources/upload/");  
+        }
+        
     },
     filename: function (req, file, cb) {
-        cb(null, Date.now() + "-" + file.originalname);
+        cb(null, Date.now() + "_" + file.originalname);
         // cb(null, Date.now());
     }
 });

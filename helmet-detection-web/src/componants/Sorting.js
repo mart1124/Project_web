@@ -5,23 +5,36 @@ import "react-datepicker/dist/react-datepicker.css";
 import Tableshow from './Tableshow';
 import axios from 'axios'
 import { makeStyles } from '@material-ui/core/styles';
-import { Button, Container, CssBaseline, MenuItem ,
-    Paper, Grid, Select, Typography, Box} from '@material-ui/core';
+import { Button, Container, MenuItem ,
+    Paper, Grid, Select, Typography, Box} from '@mui/material';
+    
 
 const useStyles = makeStyles((theme) => ({
     root: {
         margin: theme.spacing(2, 1, 3, 2),
     },
+    griditem: {
+       marginTop: theme.spacing(2),
+       marginBottom: theme.spacing(2)
+    },
     grid: {
-        marginTop: theme.spacing(1),
+        marginTop: theme.spacing(2),
+        padding: theme.spacing(2),
     },
     mp: {
-        margin: theme.spacing(2, 1, 3, 2),
-        minWidth: 120,
+        margin: theme.spacing(2),
+        minWidth: 100,
     },
-    Paper: {
+    // Paper: {
+    //     padding: theme.spacing(1,1),
+    // },
+    paper: {
         padding: theme.spacing(1,1),
-    },
+        display: 'flex',
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center',
+      },
     layout: {
         width: 'auto',
         marginTop: theme.spacing(2),
@@ -34,7 +47,11 @@ const useStyles = makeStyles((theme) => ({
         },
     },
     Box: {
-        margin: theme.spacing(2, 1, 3, 2)
+        margin: theme.spacing(2, 1, 3, 2),
+        // display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center',
     },
     text: {
         marginLeft: theme.spacing(2),
@@ -49,16 +66,15 @@ const Sorting = props => {
     const [error, setError] = useState(null);
     const [isLoaded, setIsLoaded] = useState(false);
     const [selectInput, setSelectInput] = useState("");
-    const [sumCount, setSumCount] = useState("");
+    const [sumCount, setSumCount] = useState([]);
 
     const classes = useStyles();
     
 
     const fetchData = async () => {
             const { data} = await axios('http://localhost:3001/api/filter');
-            console.log(data.sumcount);
-            // setSumCount(data.sumcount);
-            // console.log(sumCount);
+            console.log(data.sumcount[0]);
+            setSumCount(data.sumcount[0]);
             setTebleData(data);
             setIsLoaded(true);
             setError(error);
@@ -76,7 +92,7 @@ const Sorting = props => {
             params: {startDate, endDate, selectInput}
           })
             .then(response => {
-                console.log(response)
+                console.log(response.data.sumcount[0])
                 setTebleData(response.data)
                 setSumCount(response.data.sumcount[0])
             })
@@ -88,17 +104,23 @@ const Sorting = props => {
     if (isLoaded != true){
        return <div>isLoaded..</div>
     }
-    return (
-        <Container>
-        <div className={classes.layout}>
-            
-                <Box component={Paper} display="flex" flexDirection="row" square = "true" alignItems="center">
-                    <Typography className={classes.Box}> Select your function: </Typography>
+    if (selectInput === 'Day'){
+      return (
+       <Container className={classes.root}>
+            <Grid container component={Paper}>
+            <Grid container square xs={12} className={classes.grid} >
+                <Grid item xs={1} margin={2}>
+                    <Typography > Select your function: </Typography>
+                </Grid>
+                <Grid item xs={2}>
                     <Select
                         id="demo-customized-select"
+                        placeholder='Select'
                         value={selectInput}
                         className={classes.mp}
+                        variant='standard'
                         onChange={(e) => {setSelectInput(e.target.value)}}
+                        
                         >
                         <MenuItem value="">
                             <em>None</em>
@@ -107,7 +129,110 @@ const Sorting = props => {
                         <MenuItem value="Week">Week</MenuItem>
                         <MenuItem value="Month">Month</MenuItem>
                     </Select>
-                    <Box className={classes.Box}>
+                </Grid>
+                <Grid item xs={3} marginTop={1}>
+                    <Typography > Enter Date: </Typography>
+                    <DatePicker
+                        name="startdate"
+                        todayButton="ToDay" 
+                        selected={startDate} 
+                        onChange={(date) => setStartDate(date)}
+                        showTimeSelect
+                        timeFormat="HH:mm"
+                        timeIntervals={15}
+                        timeCaption="time"
+                        dateFormat ="yyyy-MM-dd HH:mm"
+                        showMonthDropdown
+                        />
+                </Grid>
+                <Grid item xs={2} marginTop={1}>
+                <Typography > Enter Date: </Typography>
+                    <DatePicker
+                        name="enddate"
+                        todayButton="ToDay" 
+                        selected={endDate} 
+                        onChange={(date) => setEndDate(date)}
+                        showTimeSelect
+                        showTimeSelectOnly
+                        timeFormat="HH:mm"
+                        timeIntervals={10}
+                        timeCaption="time"
+                        dateFormat="HH:mm"
+                        />
+                </Grid>
+                <Grid item xs={2} marginTop={1}>
+                <Typography > Enter Date: </Typography>
+                    <DatePicker
+                        name="enddate"
+                        todayButton="ToDay" 
+                        selected={endDate} 
+                        onChange={(date) => setEndDate(date)}
+                        showTimeSelect
+                        showTimeSelectOnly
+                        timeFormat="HH:mm"
+                        timeIntervals={10}
+                        timeCaption="time"
+                        dateFormat="HH:mm"
+                        />
+                </Grid>
+                <Grid item xs={1} marginTop={2}>
+                    <Button 
+                        type="submit"
+                        variant="contained"
+                        color="primary"
+                        onClick={() => {
+                            getVideoFilter()
+                        }}>ค้นหา</Button>
+                </Grid>
+            </Grid>
+            <Grid container component={Paper} square xs={12} align='center' padding={5}>
+                <Grid item sm={3} className={classes.griditem} >
+                    <Typography> Wear a helmet </Typography>
+                </Grid>
+                <Grid item sm={3} className={classes.griditem} >
+                    <Typography>{sumCount.helmet_count}</Typography>  
+                </Grid>
+                <Grid item xs={3} className={classes.griditem}>
+                    <Typography > Not wear a helmet</Typography>
+                </Grid>
+                <Grid item xs={3} className={classes.griditem}>
+                    <Typography >{sumCount.not_helmet_count} </Typography>
+                </Grid>
+            </Grid>
+            <Grid container component={Paper} square xs={12} align='center'>
+                < Tableshow listVideo={tebleData}/>
+            </Grid>
+        </Grid>
+        </Container>
+        )
+    }
+    return (
+        <Container className={classes.root}>
+            <Grid container>
+                <Grid container  square xs={10} className={classes.grid} >
+                    <Grid item xs={1} margin={2}>
+                        <Typography > Select your function: </Typography>
+                    </Grid>
+                    <Grid item xs={2}>
+                        <Select
+                            id="demo-customized-select"
+                            placeholder='Select'
+                            value={selectInput}
+                            className={classes.mp}
+                            variant='standard'
+                            onChange={(e) => {setSelectInput(e.target.value)}}
+                            
+                            >
+                            <MenuItem value="">
+                                <em>None</em>
+                            </MenuItem>
+                            <MenuItem value="Day">Day</MenuItem>
+                            <MenuItem value="Week">Week</MenuItem>
+                            <MenuItem value="Month">Month</MenuItem>
+                        </Select>
+                    </Grid>
+                    <Grid item xs={3} marginTop={1}>
+                        <Typography > Enter Date: </Typography>
                         <DatePicker
                             name="startdate"
                             todayButton="ToDay" 
@@ -117,26 +242,25 @@ const Sorting = props => {
                             timeFormat="HH:mm"
                             timeIntervals={15}
                             timeCaption="time"
-                            dateFormat="yyyy-MM-dd HH:mm"
-                            showMonthDropdown />
-                    </Box>
-                    <Box className={classes.Box}>
-                        <Typography> To </Typography>
-                    </Box>
-                    <Box className={classes.Box}>
+                            dateFormat ="yyyy-MM-dd HH:mm"
+                            showMonthDropdown
+                            
+                            />
+                    </Grid>
+                    <Grid item xs={3} marginTop={1}>
+                    <Typography > Enter Date: </Typography>
                         <DatePicker
                             name="enddate"
                             todayButton="ToDay" 
-                            selected={endDate} 
+                            selected={endDate}
                             onChange={(date) => setEndDate(date)}
-                            showTimeSelect
                             timeFormat="HH:mm"
                             timeIntervals={15}
                             timeCaption="time"
                             dateFormat="yyyy-MM-dd HH:mm"
                             showMonthDropdown />
-                    </Box>
-                    <Box className={classes.Box}>
+                    </Grid>
+                    <Grid item xs={2} marginTop={2} align='left'>
                         <Button 
                             type="submit"
                             variant="contained"
@@ -144,21 +268,311 @@ const Sorting = props => {
                             onClick={() => {
                                 getVideoFilter()
                             }}>ค้นหา</Button>
-                    </Box>
-                </Box>
+                    </Grid>
+                </Grid>
+                <Grid container component={Paper} square xs={2} className={classes.grid} > 
                 
-                <Box component={Paper} display="flex"  square = "true" alignItems="center">
-                    <Typography className={classes.Box}> Wear a helmet: {sumCount} </Typography>
-                    <Typography className={classes.Box}> Not wear a helmet: {sumCount} </Typography>
-                </Box>
-                <Grid className={classes.grid} container item xs={12} >
+                </Grid>    
+                <Grid container component={Paper} square xs={12} align='center' padding={5}>
+                    <Grid item sm={3} className={classes.griditem} >
+                        <Typography> Wear a helmet </Typography>
+                    </Grid>
+                    <Grid item sm={3} className={classes.griditem} >
+                        <Typography>{sumCount.helmet_count}</Typography>  
+                    </Grid>
+                    <Grid item xs={3} className={classes.griditem}>
+                        <Typography > Not wear a helmet</Typography>
+                    </Grid>
+                    <Grid item xs={3} className={classes.griditem}>
+                        <Typography >{sumCount.not_helmet_count} </Typography>
+                    </Grid>
+                </Grid>
+                <Grid container component={Paper} square xs={12} align='center'>
                     < Tableshow listVideo={tebleData}/>
                 </Grid>
-              
-        </div>
+            </Grid>
         </Container>
+        
     )
 }
 
 
 export default Sorting
+
+
+{/* <div className={classes.root}>
+            
+            <div className={classes.layout}>
+                <Container>
+                    <Box component={Paper} display="flex" flexDirection="row" square = "true" alignItems="center">
+                        <Typography className={classes.Box}> Select your function: </Typography>
+                        <Select
+                            id="demo-customized-select"
+                            value={selectInput}
+                            className={classes.mp}
+                            onChange={(e) => {setSelectInput(e.target.value)}}
+                            >
+                            <MenuItem value="">
+                                <em>None</em>
+                            </MenuItem>
+                            <MenuItem value="Day">Day</MenuItem>
+                            <MenuItem value="Week">Week</MenuItem>
+                            <MenuItem value="Month">Month</MenuItem>
+                        </Select>
+                        <Box className={classes.Box}>
+                            <DatePicker
+                                name="startdate"
+                                todayButton="ToDay" 
+                                selected={startDate} 
+                                onChange={(date) => setStartDate(date)}
+                                showTimeSelect
+                                timeFormat="HH:mm"
+                                timeIntervals={15}
+                                timeCaption="time"
+                                dateFormat="yyyy-MM-dd HH:mm"
+                                showMonthDropdown
+                                
+                                />
+                        </Box>
+                        <Box className={classes.Box}>
+                            <Typography> To </Typography>
+                        </Box>
+                        <Box className={classes.Box}>
+                            <DatePicker
+                                name="enddate"
+                                todayButton="ToDay" 
+                                selected={endDate} 
+                                onChange={(date) => setEndDate(date)}
+                                showTimeSelect
+                                timeFormat="HH:mm"
+                                timeIntervals={15}
+                                timeCaption="time"
+                                dateFormat="yyyy-MM-dd HH:mm"
+                                showMonthDropdown />
+                        </Box>
+                        <Box className={classes.Box}>
+                            <Button 
+                                type="submit"
+                                variant="contained"
+                                color="primary"
+                                onClick={() => {
+                                    getVideoFilter()
+                                }}>ค้นหา</Button>
+                        </Box>
+                    </Box>
+                    
+                    <Grid component={Paper} display="flex" square = "true">
+                        <Typography className={classes.Box}> Wear a helmet: {sumCount.helmet_count} </Typography>
+                        <Typography className={classes.Box}> Not wear a helmet: {sumCount.not_helmet_count} </Typography>
+                    </Grid>
+                    <Grid className={classes.grid} container item xs={12} >
+                        < Tableshow listVideo={tebleData}/>
+                    </Grid>
+                    </Container>
+            </div>
+        </div> */}
+
+        //  <div className={classes.root}>
+        // <Container>
+        // <div className={classes.layout}>
+        //         <Box component={Paper} display="flex" flexDirection="row" square = "true" alignItems="center">
+        //             <Typography className={classes.Box}> Select your function: </Typography>
+        //             <Select
+        //                 id="demo-customized-select"
+        //                 value={selectInput}
+        //                 className={classes.mp}
+        //                 onChange={(e) => {setSelectInput(e.target.value)}}
+        //                 >
+        //                 <MenuItem value="">
+        //                     <em>None</em>
+        //                 </MenuItem>
+        //                 <MenuItem value="Day">Day</MenuItem>
+        //                 <MenuItem value="Week">Week</MenuItem>
+        //                 <MenuItem value="Month">Month</MenuItem>
+        //             </Select>
+        //             <Box className={classes.Box}>
+        //                 <DatePicker
+        //                     name="startdate"
+        //                     todayButton="ToDay" 
+        //                     selected={startDate} 
+        //                     onChange={(date) => setStartDate(date)}
+        //                     showTimeSelect
+        //                     timeFormat="HH:mm"
+        //                     timeIntervals={15}
+        //                     timeCaption="time"
+        //                     dateFormat="yyyy-MM-dd HH:mm"
+        //                     showMonthDropdown
+                            
+        //                     />
+        //             </Box>
+        //             <Box className={classes.Box}>
+        //                 <Typography> To </Typography>
+        //             </Box>
+        //             <Box className={classes.Box}>
+        //                 <DatePicker
+        //                     name="enddate"
+        //                     todayButton="ToDay" 
+        //                     selected={endDate} 
+        //                     onChange={(date) => setEndDate(date)}
+        //                     showTimeSelect
+        //                     timeFormat="HH:mm"
+        //                     timeIntervals={15}
+        //                     timeCaption="time"
+        //                     dateFormat="yyyy-MM-dd HH:mm"
+        //                     showMonthDropdown />
+        //             </Box>
+        //             <Box className={classes.Box}>
+        //                 <Button 
+        //                     type="submit"
+        //                     variant="contained"
+        //                     color="primary"
+        //                     onClick={() => {
+        //                         getVideoFilter()
+        //                     }}>ค้นหา</Button>
+        //             </Box>
+        //         </Box>
+                
+        //         <Grid component={Paper} display="flex" square = "true">
+        //             <Typography className={classes.Box}> Wear a helmet: {sumCount.helmet_count} </Typography>
+        //             <Typography className={classes.Box}> Not wear a helmet: {sumCount.not_helmet_count} </Typography>
+        //         </Grid>
+        //         <Grid className={classes.grid} container item xs={12} >
+        //             < Tableshow listVideo={tebleData}/>
+        //         </Grid>
+                
+        // </div>
+        // </Container>
+    // </div>
+        // <div className={classes.root}>
+            
+        //     <div className={classes.layout}>
+        //         <Container>
+        //         <Box component={Paper} display="flex" flexDirection="row" square = "true" alignItems="center">
+        //                 <Typography className={classes.Box}> Select your function: </Typography>
+        //                 <Select
+        //                     id="demo-customized-select"
+        //                     value={selectInput}
+        //                     className={classes.mp}
+        //                     onChange={(e) => {setSelectInput(e.target.value)}}
+        //                     >
+        //                     <MenuItem value="">
+        //                         <em>None</em>
+        //                     </MenuItem>
+        //                     <MenuItem value="Day">Day</MenuItem>
+        //                     <MenuItem value="Week">Week</MenuItem>
+        //                     <MenuItem value="Month">Month</MenuItem>
+        //                 </Select>
+        //                 <Box className={classes.Box}>
+        //                     <DatePicker
+        //                         name="startdate"
+        //                         todayButton="ToDay" 
+        //                         selected={startDate} 
+        //                         onChange={(date) => setStartDate(date)}
+        //                         showTimeSelect
+        //                         timeFormat="HH:mm"
+        //                         timeIntervals={15}
+        //                         timeCaption="time"
+        //                         dateFormat="yyyy-MM-dd HH:mm"
+        //                         showMonthDropdown
+                                
+        //                         />
+        //                 </Box>
+        //                 <Box className={classes.Box}>
+        //                     <Typography> To </Typography>
+        //                 </Box>
+        //                 <Box className={classes.Box}>
+        //                     <DatePicker
+        //                         name="enddate"
+        //                         todayButton="ToDay" 
+        //                         selected={endDate} 
+        //                         onChange={(date) => setEndDate(date)}
+        //                         showTimeSelect
+        //                         timeFormat="HH:mm"
+        //                         timeIntervals={15}
+        //                         timeCaption="time"
+        //                         dateFormat="yyyy-MM-dd HH:mm"
+        //                         showMonthDropdown />
+        //                 </Box>
+        //                 <Box className={classes.Box}>
+        //                     <Button 
+        //                         type="submit"
+        //                         variant="contained"
+        //                         color="primary"
+        //                         onClick={() => {
+        //                             getVideoFilter()
+        //                         }}>ค้นหา</Button>
+        //                 </Box>
+        //             </Box>
+        //             <Grid container spacing={2}>
+        //                 <Grid item sm={12} >
+        //                     <Paper className={classes.paper} square = "true">
+        //                     <Grid item sm={'auto'}>
+        //                         <Typography > Select your function: </Typography>
+        //                     </Grid>
+        //                     <Grid item sm={'auto'}>
+        //                         <Select
+        //                             id="demo-customized-select"
+        //                             value={selectInput}
+        //                             className={classes.mp}
+        //                             onChange={(e) => {setSelectInput(e.target.value)}}
+        //                             >
+        //                             <MenuItem value="">
+        //                                 <em>None</em>
+        //                             </MenuItem>
+        //                             <MenuItem value="Day">Day</MenuItem>
+        //                             <MenuItem value="Week">Week</MenuItem>
+        //                             <MenuItem value="Month">Month</MenuItem>
+        //                         </Select>
+        //                     </Grid>
+        //                     <Grid item sm={'auto'}>
+        //                         <Typography className={classes.Box}> Enter Date: </Typography>
+        //                     </Grid>
+        //                     <Grid item sm={'auto'}>
+        //                         <DatePicker
+        //                             name="startdate"
+        //                             todayButton="ToDay" 
+        //                             selected={startDate} 
+        //                             onChange={(date) => setStartDate(date)}
+        //                             showTimeSelect
+        //                             timeFormat="HH:mm"
+        //                             timeIntervals={15}
+        //                             timeCaption="time"
+        //                             dateFormat="yyyy-MM-dd HH:mm"
+        //                             showMonthDropdown
+        //                         />
+        //                     </Grid>
+        //                     <Grid item sm={'auto'}>
+        //                         <Typography className={classes.Box}> To </Typography>
+        //                     </Grid>
+        //                     <Grid item sm={'auto'}>
+        //                         <DatePicker
+        //                                 name="enddate"
+        //                                 todayButton="ToDay" 
+        //                                 selected={endDate} 
+        //                                 onChange={(date) => setEndDate(date)}
+        //                                 showTimeSelect
+        //                                 timeFormat="HH:mm"
+        //                                 timeIntervals={15}
+        //                                 timeCaption="time"
+        //                                 dateFormat="yyyy-MM-dd HH:mm"
+        //                                 showMonthDropdown />
+        //                     </Grid>
+        //                     <Grid item sm={'auto'}>
+        //                         <Button 
+        //                             type="submit"
+        //                             variant="contained"
+        //                             color="primary"
+        //                             onClick={() => {
+        //                                 getVideoFilter()
+        //                         }}>ค้นหา</Button>
+        //                     </Grid>
+                               
+        //                     </Paper>
+        //                 </Grid>
+        //             </Grid>
+        //             <Grid className={classes.grid} container item xs={12} >
+        //                 < Tableshow listVideo={tebleData}/>
+        //             </Grid>
+        //         </Container>
+        //     </div>
+        // </div>
