@@ -23,9 +23,9 @@ app.use(express.json());
 app.use(cors());
 app.use(cookieParser());
 
-
 app.post("/upload-config", uploadCon.uploadConfig);
 app.post("/api/upload", upload.single('file'), uploadCon.uploadFiles);
+app.post("/api/uploadimg", upload.single('file'), uploadCon.uploadImgFiles);
 app.use("/api/stream", steram);
 app.use("/api", filter);
 app.use("/api", userRoutes);

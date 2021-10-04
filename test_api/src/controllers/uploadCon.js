@@ -3,6 +3,7 @@ const fs = require('fs');
 const path = require("path")
 const db = require('../models');
 const dbFile = db.files;
+const dbhistory = db.history;
 
 
 const uploadFiles = (req , res) => {
@@ -61,11 +62,37 @@ const  uploadConfig = async (req, res) => {
         });
     });
 
-    
+}
+
+const uploadImgFiles = (req , res) => {
+    try{
+        if (req.file == undefined){
+            console.log('select file')
+        }
+        console.log(req.file)
+        dbhistory.create({
+            type: req.file.mimetype,
+            name: req.file.originalname,
+            pic: req.file.path,
+            Location: "หน้าภาควิศวคอมพิวเตอร์",
+            helmet_count: "0",
+            not_helmet_count: "0",
+            status: true
+        }).then(resdata => {
+            res.json({
+                massage: "OK",
+                statusCode: 200,
+                resdata
+            })
+        })
+    } catch(error){
+        console.log("ERROR:",error); 
+    }
 }
 
 
 module.exports = {
     uploadFiles,
-    uploadConfig
+    uploadConfig,
+    uploadImgFiles
 }

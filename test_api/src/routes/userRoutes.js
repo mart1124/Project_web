@@ -15,8 +15,9 @@ const usersMiddleware = require('../middleware/users')
 */
 
 router.post('/register', usersMiddleware.validRegister,  async (req, res) => {
-    const {name, email, password} = req.body;
-    
+
+    const {name , email, password} = req.body.data
+
     if (!(name && email && password)) {
         res.status(400).json({
             message: "All input is required",
@@ -86,10 +87,6 @@ router.get('/login', async function(req, res, next){
 })
 
 router.post('/login', async function(req, res, next){
-    // token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZFVzZXIiOiIkMmEkMTAkVUpFUGo3MUdFUzY3aTJob2E1UEJRLkp6WFFkTTBhRm1hL3hMVkF2RjlLR0VSeGpaaHJZa0MiLCJuYW1lIjoiMTIzNCIsImlhdCI6MTYzMDc0MjYzNCwiZXhwIjoxNjMwNzQyOTM0fQ.REPVP1vE-gAl8posZpOeYiCFBBbpt500KLn-qcOPv_A"
-    // res
-    //     .cookie("Authorization", token, {path: '/home', httpOnly: true})
-    //     .json({ auth: true, token: token })
 
     const {email, password} = req.body
     const epass = email + password
@@ -98,7 +95,7 @@ router.post('/login', async function(req, res, next){
     if (!users) {
         return res.status(400).json({
             auth: false,
-            message: "Email is worng",
+            message: "Email address is invalid.",
             status: 400
         });
     }
@@ -132,7 +129,7 @@ router.post('/login', async function(req, res, next){
             auth: true,
             message: "Login Success",
             token: token,
-            expiresIn: "2h",
+            expiresIn: "5m",
             status: 200
          })
 

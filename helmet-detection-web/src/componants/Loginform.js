@@ -1,11 +1,10 @@
 import React from 'react';
 import { useHistory } from "react-router-dom";
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import axios from 'axios'
 import { Button, Container, CssBaseline, TextField,
-    Paper, Grid, Link, Typography} from '@material-ui/core';
-// import Alert from '@material-ui/lab/Alert';
-import { makeStyles, createTheme  } from '@material-ui/core/styles';
+    Paper, Alert , Link, Typography} from '@mui/material';
+import { makeStyles} from '@material-ui/core/styles';
 
 // axios.defaults.withCredentials = true;
 
@@ -56,48 +55,51 @@ const useStyles = makeStyles((theme) => ({
 
 const Loginform = props => {
     const [email, setEmail] = useState("");
-    const [password, setPassword] = useState("");
-    const [error, setError] = useState("");
-    const [loginstatus, setLoginstatus] = useState(false);
+    const [password, setPassword] = useState("");;
+    const [alert, setAlert] = useState(false);
+    const [alertContent, setAlertContent] = useState('');
     const classes = useStyles();
     const history = useHistory();
+    
+
     function userLogin(){
         axios
             .post("http://localhost:3001/api/login", { email: email, password: password }, { validateStatus: function (status) {
                 return status < 500; // Reject only if the status code is greater than or equal to 500
               } })
             .then(response => {
-                console.log(response.data.token)
-                if (response.status == 200 && response.data.auth == true){
-                    setLoginstatus(true)
-                    // let path = `/`; 
-                    // history.push(path); 
-                    console.log(response)
-                    axios('http://localhost:3001/home', { 
-                        // withCredentials: true ,
+    
+                if (response.status === 200 && response.data.auth === true){
+                    let authstatus = response.data.auth
+                    axios('http://localhost:3001/auth', { 
+                        params: {authstatus},
                         headers: {
                             Authorization: response.data.token
                         }
                     }).then((res) => {
-                        let path = `/`; 
-                        history.push(path); 
-                       console.log(res) 
+                        if(res.status === 200){ 
+                            let path = `/`; 
+                            history.push(path); 
+                            console.log(res) 
+                        } else {
+                            console.log(res)
+                        }
+                        
                     })
                   }
                 
-                if (response.status == 400){
-                  console.log("response: ", response.data)  
+                if (response.status === 400){
+                    setAlertContent(response.data.message);
+                    setAlert(true);
                 }
                 
             })
             .catch(err => {
+                alert(err)
                 console.error(err)
             })
     }
 
-   
-
-    console.log("login:", email, password)
     return (
         <Container component="main" maxWidth="md" >
             <CssBaseline />
@@ -127,6 +129,9 @@ const Loginform = props => {
                         onChange={(e) => {setPassword(e.target.value)}}
 
                     />
+                    {alert ? <Alert severity='error' onClose={() => setAlert(null)} >
+                        {alertContent}  </Alert> : <></> }
+                    <br />
                     <Button
                         type="submit"
                         variant="contained"
@@ -140,11 +145,11 @@ const Loginform = props => {
                     </Button>
                     <hr />
                     <Typography >
+                        Create a new Account ? &nbsp;
                         <Link href="/admin/register">
-                            Create a new Account ? 
+                            Sign Up
                         </Link>
                     </Typography>
-                    {/* <Alert severity="error">This is an error alert — check it out!</Alert> */}
                 </Paper>
             </div>
         </Container>

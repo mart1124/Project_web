@@ -6,49 +6,172 @@ const { Op, Sequelize } = require("sequelize");
 
 // GET เอาไว้ เรียกข้อมูลไปแสดง และ ค้นหาข้อมูล
 router.get('/filter', function ( req, res ) {
-    const startdate = req.query.startDate;
-    const enddate = req.query.endDate;
-    const selectinput = req.query.selectInput;
-    console.log(startdate, enddate, selectinput)
-    if(startdate && enddate && selectinput){
-      
-      filterfiles.findAll({
-        attributes: ['id', 'type', 'name', 'data', 'helmet_count', 'not_helmet_count'],
-        where: {
-          createdAt: {
-            [Op.between]: [startdate ,enddate]
-          },
-        // order: [[Sequelize.literal("createdOn"), 'ASC']],
-        // group: 'createdAt'
-        },
-    }).then(data => {
+    const {startDate, endDate, selectInput, startTime, endTime, yearData ,monthData} = req.query;
+    
+    console.log('test:',selectInput, startDate, endDate, startTime, endTime)
+    if(selectInput){
+      console.log('input : ', selectInput)
+      //  ## DAY ##################################################################
+
+      if (selectInput == 'Day' && startDate && startTime && endTime){
+        let Daydate = startDate
+        console.log('เข้า if Day')
         filterfiles.findAll({
-            attributes: [
-              [Sequelize.fn('SUM', Sequelize.col('helmet_count')), 'helmet_count'],
-              [Sequelize.fn('SUM', Sequelize.col('not_helmet_count')), 'not_helmet_count'],
-            ],
-            where: {
-              createdAt: {
-                [Op.between]: [startdate ,enddate]
-              },
-            // order: [[Sequelize.literal("createdOn"), 'ASC']],
-            // group: 'createdAt'
+          attributes: ['id', 'type', 'name', 'data', 'helmet_count', 'not_helmet_count'],
+          where: {
+            createdAt: {
+              [Op.between]: [startDate ,endDate]
             },
-        }).then(sumcount => {
-          
-            res.status(200).json({
-                data,
-                sumcount
-            });
+          // order: [[Sequelize.literal("createdOn"), 'ASC']],
+          // group: 'createdAt'
+          },
+      }).then(data => {
+          filterfiles.findAll({
+              attributes: [
+                [Sequelize.fn('SUM', Sequelize.col('helmet_count')), 'helmet_count'],
+                [Sequelize.fn('SUM', Sequelize.col('not_helmet_count')), 'not_helmet_count'],
+              ],
+              where: {
+                createdAt: {
+                  [Op.between]: [startDate ,endDate]
+                },
+              // order: [[Sequelize.literal("createdOn"), 'ASC']],
+              // group: 'createdAt'
+              },
+          }).then(sumcount => {
+            
+              res.status(200).json({
+                  data,
+                  sumcount
+              });
+          })
         })
-      })
-      .catch(error => {
-          console.log(error);
-          res.status(500).json({
-            message: "Error!",
-            error: error
-          });
-      });
+        .catch(error => {
+            console.log(error);
+            res.status(500).json({
+              message: "Error!",
+              error: error
+            });
+        });
+      }
+
+      //  ## Week ##################################################################
+
+      if (selectInput == 'Week' && startDate && endDate){
+        console.log('เข้า if Week')
+        filterfiles.findAll({
+          attributes: ['id', 'type', 'name', 'data', 'helmet_count', 'not_helmet_count'],
+          where: {
+            createdAt: {
+              [Op.between]: [startDate ,endDate]
+            },
+          // order: [[Sequelize.literal("createdOn"), 'ASC']],
+          // group: 'createdAt'
+          },
+      }).then(data => {
+          filterfiles.findAll({
+              attributes: [
+                [Sequelize.fn('SUM', Sequelize.col('helmet_count')), 'helmet_count'],
+                [Sequelize.fn('SUM', Sequelize.col('not_helmet_count')), 'not_helmet_count'],
+              ],
+              where: {
+                createdAt: {
+                  [Op.between]: [startDate ,endDate]
+                },
+              // order: [[Sequelize.literal("createdOn"), 'ASC']],
+              // group: 'createdAt'
+              },
+          }).then(sumcount => {
+            
+              res.status(200).json({
+                  data,
+                  sumcount
+              });
+          })
+        })
+        .catch(error => {
+            console.log(error);
+            res.status(500).json({
+              message: "Error!",
+              error: error
+            });
+        });
+      }
+      
+      //  ## Month ##################################################################
+
+      if (selectInput == 'Month' && monthData ){
+        console.log('เข้า if Month', monthData)
+        
+        filterfiles.findAll({
+          
+          attributes: ['id', 'type', 'name', 'data', 'helmet_count', 'not_helmet_count'],
+          where: {
+            [Op.and]: [
+              Sequelize.where(Sequelize.fn('Month', Sequelize.col('createdAt')), monthData),
+              Sequelize.where(Sequelize.fn('YEAR', Sequelize.col('createdAt')), monthData)
+            ]
+          }
+      }).then(data => {
+          filterfiles.findAll({
+              attributes: [
+                [Sequelize.fn('SUM', Sequelize.col('helmet_count')), 'helmet_count'],
+                [Sequelize.fn('SUM', Sequelize.col('not_helmet_count')), 'not_helmet_count'],
+              ],
+              where: {
+                createdAt:{
+                  '$gte': monthData
+                }
+              }
+          }).then(sumcount => {
+            
+              res.status(200).json({
+                  data,
+                  sumcount
+              });
+          })
+        })
+        .catch(error => {
+            console.log(error);
+            res.status(500).json({
+              message: "Error!",
+              error: error
+            });
+        });
+      }
+
+      //  ## Year  ##################################################################
+
+      if (selectInput == 'Year' && yearData){
+
+        console.log('เข้า if Year', yearData)
+        filterfiles.findAll({
+          attributes: ['id', 'type', 'name', 'data', 'helmet_count', 'not_helmet_count'],
+          where: Sequelize.where(Sequelize.fn('YEAR', Sequelize.col('createdAt')), yearData)
+      }).then(data => {
+          filterfiles.findAll({
+              attributes: [
+                [Sequelize.fn('SUM', Sequelize.col('helmet_count')), 'helmet_count'],
+                [Sequelize.fn('SUM', Sequelize.col('not_helmet_count')), 'not_helmet_count'],
+              ],
+              where: Sequelize.where(Sequelize.fn('YEAR', Sequelize.col('createdAt')), yearData)
+          }).then(sumcount => {
+            
+              res.status(200).json({
+                  data,
+                  sumcount
+              });
+          })
+        })
+        .catch(error => {
+            console.log(error);
+            res.status(500).json({
+              message: "Error!",
+              error: error
+            });
+        });
+      }
+      
     } else {
     filterfiles.findAll({
         attributes: ['id', 'type', 'name', 'data'],

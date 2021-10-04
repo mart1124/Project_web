@@ -1,9 +1,9 @@
-import React, {useState, useRef } from 'react'
-// import * as ReactBootStrap from 'react-bootstrap'
+import React, {useState, useRef ,useEffect} from 'react'
 import { makeStyles } from '@material-ui/core/styles';
-import {Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, TablePagination, TableFooter } from '@material-ui/core';
+import {Table, TableBody, TableCell, TableContainer, TableHead, 
+    TableRow, Paper, TablePagination , TableFooter, Link } from '@material-ui/core';
 // import ReactToPrint from "react-to-print";
-import { useReactToPrint } from 'react-to-print';
+import ReactToPrint, { PrintContextConsumer  } from 'react-to-print';
 import PDFprint from './PDFprint';
 
 const useStyles = makeStyles({
@@ -13,28 +13,33 @@ const useStyles = makeStyles({
   });
 
 function Tableshow ({listVideo}) {
-    const [refprint, setRefprint] = useState([]);
+    const [refPrint, setRefPrint] = React.useState();
+    const [page, setPage] = React.useState(2);
+    const [rowsPerPage, setRowsPerPage] = React.useState(10);
     const classes = useStyles();
-    const componentRef = useRef();
+    // const handleprint = useReactToPrint ({
+    //     content: () => refPrint,
+    // });
 
+    const handleClick = (event) => {
+      <PDFprint key={event.id} name={event.name} data={event.data} ref={(el)=> setRefPrint(el)} />
+       console.log(event)
+    //    window.print()
+    };
 
-    const handlePrint = useReactToPrint({
-        content: () => componentRef.current,
+    const handleChangePage = (event, newPage) => {
+        setPage(newPage);
+    };
     
-    });
-
-    function PrintPDF({printdata}) {
-        useReactToPrint({ content: () => refprint });
-        <div style={{display:'none'}}>
-            <PDFprint printdata={printdata} ref={el => (setRefprint(el))} />
-        </div>
-        
-    }
+    const handleChangeRowsPerPage = (event) => {
+    setRowsPerPage(parseInt(event.target.value, 10));
+    setPage(0);
+    };
 
     return (
 
-        <TableContainer component={Paper} square = "true">
-        <Table className={classes.table} aria-label="Video table">
+        <TableContainer component={Paper} square = "true" >
+        <Table className={classes.table} aria-label="Video table" >
             <TableHead>
             <TableRow >
                 <TableCell align="">ID</TableCell>
@@ -46,8 +51,8 @@ function Tableshow ({listVideo}) {
             </TableHead>
             <TableBody>
                 {
-                    listVideo.data && listVideo.data.map((item) => (
-                        <TableRow key={item.id}>
+                    listVideo.data && listVideo.data.map((item, index) => (
+                        <TableRow key={index}>
                             <TableCell component="th" scope="row">
                             {item.id}
                             </TableCell>
@@ -56,35 +61,31 @@ function Tableshow ({listVideo}) {
                             <TableCell >{item.data}</TableCell>
                             
                             <TableCell > 
-                                {/* <a href="#" onClick={PrintPDF({printdata: {item}} )} >Print PDF</a> */}
-                                {/* <ReactToPrint content={() => refprint } /> */}
-                                {/* <div style={{display:'none'}} >
-                                <PDFprint type={item.type} name={item.name} url={item.data} ref={componentRef} />
-                                </div> */}
-                                {/* <PDFprint type={item.type} name={item.name} url={item.data} ref={componentRef}/> */}
-                                {/* <ReactToPrint 
-                                    key={item.id}
-                                    trigger={() => <a href="#">Print PDF</a>}
-                                    content={() => refprint}
-                                />
-                                <div style={{display:'none'}}>
-                                    <PDFprint key={item.id} type={item.type} name={item.name} url={item.data}  ref={el => (setRefprint(el))} />
-                                </div>  */}
+                                {/* <ReactToPrint  
+
+                                /> */}
+                                <Link 
+                                    href="#" 
+                                    variant="body2"
+                                    underline="always"
+                                    onClick={(e) => handleClick(item, e)}>
+                                    Print PDF
+                                </Link>
+                                
+
                             </TableCell>
-                            {/* <div style={{display:'none'}} >
-                                <PDFprint type={item.type} name={item.name} url={item.data}/>
-                            </div> */}
+            
                         </TableRow>
                         
                     ))
                 }
             </TableBody>
-            {/* <TableFooter>
+            <TableFooter>
             <TableRow>
                 <TablePagination
                 rowsPerPageOptions={[5, 10, 25, { label: 'All', value: -1 }]}
                 colSpan={3}
-                count={rows.length}
+                count={listVideo.data.length}
                 rowsPerPage={rowsPerPage}
                 page={page}
                 SelectProps={{
@@ -95,10 +96,9 @@ function Tableshow ({listVideo}) {
                 }}
                 onPageChange={handleChangePage}
                 onRowsPerPageChange={handleChangeRowsPerPage}
-                ActionsComponent={TablePaginationActions}
                 />
             </TableRow>
-            </TableFooter> */}
+            </TableFooter>
             </Table>
         </TableContainer>
         
@@ -107,3 +107,26 @@ function Tableshow ({listVideo}) {
 
 export default Tableshow
 
+// listVideo.data && listVideo.data.map((item, index) => (
+//     <TableRow key={item.id}>
+//         <TableCell component="th" scope="row">
+//         {item.id}
+//         </TableCell>
+//         <TableCell >{item.type}</TableCell>
+//         <TableCell >{item.name}</TableCell>
+//         <TableCell >{item.data}</TableCell>
+        
+//         <TableCell > 
+//             {/* <ReactToPrint
+//                 key={item.id} 
+//                 trigger={() =>  <a href="#" >Print PDF</a> } /> */}
+            
+//             <a  key={item.id} href="#" onClick={handlePrint([item])} >Print PDF</a>
+//             {/* <div style={{display:'none'}} >
+//             <PDFprint key={item.id} name={item.name} data={item.data}
+//             />
+//             </div> */}
+            
+//         </TableCell>
+
+//     </TableRow>

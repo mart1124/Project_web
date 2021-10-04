@@ -1,9 +1,12 @@
-import React, { useEffect, useState } from 'react'
-import { Nevbar } from './nevbar'
+import React, {Fragment} from 'react'
+import { useHistory } from "react-router-dom";
 import axios from 'axios'
 import { Button, Container, CssBaseline, TextField,
-    Paper, Grid, Link, Typography} from '@material-ui/core';
-import { makeStyles, createTheme  } from '@material-ui/core/styles';
+    Paper, Link, Typography} from '@mui/material';
+import { makeStyles } from '@material-ui/core/styles';
+import { userSchema } from './validations/UserValidate.js'
+import { useForm } from 'react-hook-form';
+import { yupResolver } from '@hookform/resolvers/yup';
 
 
 const useStyles = makeStyles((theme) => ({
@@ -52,23 +55,40 @@ const useStyles = makeStyles((theme) => ({
 
 
 const Register = () => {
-    const [inputname, setInputname] = useState("");
-    const [inputemail, setInputemail] = useState("");
-    const [inputpassword, setinputPassword] = useState("");
     const classes = useStyles();
-
-    function userRegister(){
+    const history = useHistory();
+    const {
+        register,
+        handleSubmit,
+        formState: { errors }
+      } = useForm({
+        resolver: yupResolver(userSchema)
+      });
+      const userRegister = data =>  {
+        /* 
+            ======== ส่ง data ไป Register ======== 
+        */
         axios
-            .post("http://localhost:3001/api/register", { name: inputname,  email: inputemail, password: inputpassword })
+            .post("http://localhost:3001/api/register", { data })
             .then(response => {
                 // เปิดหน้า Login
-                
+                if(response.status === 200){   
+                    let path = `/admin/login`; 
+                    history.push(path); 
+                    console.log(response) 
+                } else {
+                    console.log(response)
+                }
+                console.log(response)
             })
             .catch(err => {
                return Promise.reject(err);
             })
     }
+
     return (
+
+        <Fragment>
         <Container component="main" maxWidth="md" >
             <CssBaseline />
             <div className={classes.layout}>
@@ -84,8 +104,9 @@ const Register = () => {
                         name="name"
                         label="Name"
                         type="text"
-                        onChange={(e) => {setInputname(e.target.value)}}
-
+                        {...register('name')}
+                        error={errors.name ? true : false}
+                        helperText={errors.name?.message}
                     />
                     <TextField
                         variant="outlined"
@@ -95,7 +116,9 @@ const Register = () => {
                         label="Email Address"
                         name="email"
                         autoFocus
-                        onChange={(e) => {setInputemail(e.target.value)}}
+                        {...register('email')}
+                        error={errors.email ? true : false}
+                        helperText={errors.email?.message}
                     />
                     <TextField
                         variant="outlined"
@@ -105,71 +128,45 @@ const Register = () => {
                         name="password"
                         label="Password"
                         type="password"
-                        onChange={(e) => {setinputPassword(e.target.value)}}
-
+                        {...register('password')}
+                        error={errors.password ? true : false}
+                        helperText={errors.password?.message}
+                    />
+                     <TextField
+                        variant="outlined"
+                        margin="normal"
+                        required
+                        id="confirmPassword"
+                        name="confirmPassword"
+                        label="Confirm Password"
+                        type="password"
+                        fullWidth
+                        {...register('confirmPassword')}
+                        error={errors.confirmPassword ? true : false}
+                        helperText={errors.confirmPassword?.message}
                     />
                     <Button
                         type="submit"
                         variant="contained"
                         color="primary"
                         className={classes.submit}
-                        onClick={() => {
-                            userRegister()
-                        }}
+                        onClick={
+                            handleSubmit(userRegister)      
+                        }
                     >
                         Sign Up
                     </Button>
+                    <hr />
+                    <Typography >
+                        Have an Account ? &nbsp;
+                        <Link href="/admin/login">
+                            Sing In 
+                        </Link>
+                    </Typography>
                 </Paper>
             </div>
         </Container>
-        // <Container fixed>
-        //     {/* < Nevbar />    */}
-        //     <h1>Register Page</h1>
-        //     <form>
-        //         <div className="form-group row">
-        //             <div className="mb3 mt-2">
-        //                 <label>Name</label>
-        //                 <br />
-        //                 <input 
-        //                     type="text" 
-        //                     name="name" 
-        //                     placeholder="name" 
-        //                     value={inputname} 
-        //                     onChange={(e) => {setInputname(e.target.value)}} 
-        //                     />
-        //             </div>
-        //         </div>
-        //         <div className="form-group">
-        //             <div className="col mx-auto mt-2">
-        //                 <label>Username</label>
-        //                 <br />
-        //                 <input 
-        //                     type="email" 
-        //                     placeholder="Email" 
-        //                     value={inputemail} 
-        //                     onChange={(e) => {setInputemail(e.target.value)}} /> 
-        //             </div>
-        //         </div>
-        //         <div className="form-group">
-        //             <div className="col mx-auto mt-2">
-        //                 <label>Password</label>
-        //                 <br />
-        //                 <input 
-        //                     type="password" 
-        //                     name="password" 
-        //                     placeholder="password" 
-        //                     value={inputpassword} 
-        //                     onChange={(e) => {setinputPassword(e.target.value)}} 
-        //                     />
-        //             </div>
-        //         </div>
-        //         <Button variant="contained" color="primary" onClick={() => {
-        //            userRegister()
-        //         }}>AddUser</Button>
-        //     </form>
-        // </Container>
-        
-        
+        </Fragment>      
     )
 }
 
