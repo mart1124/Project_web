@@ -15,7 +15,7 @@ const uploadFiles = (req , res) => {
         console.log(req.file)
         dbFile.create({
             type: req.file.mimetype,
-            name: req.file.originalname,
+            name: req.file.filename,
             data: fullUrl,
             status: true
         }).then(resdata => {
@@ -72,7 +72,7 @@ const uploadImgFiles = (req , res) => {
         console.log(req.file)
         dbhistory.create({
             type: req.file.mimetype,
-            name: req.file.originalname,
+            name: req.file.filename,
             pic: req.file.path,
             Location: "หน้าภาควิศวคอมพิวเตอร์",
             helmet_count: "0",

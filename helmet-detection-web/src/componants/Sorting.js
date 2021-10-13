@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import { Nevbar } from './nevbar';
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import Tableshow from './Tableshow';

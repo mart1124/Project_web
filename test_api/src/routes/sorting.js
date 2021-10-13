@@ -6,24 +6,25 @@ const { Op, Sequelize } = require("sequelize");
 
 // GET เอาไว้ เรียกข้อมูลไปแสดง และ ค้นหาข้อมูล
 router.get('/filter', function ( req, res ) {
-    const {startDate, endDate, selectInput, startTime, endTime, yearData ,monthData} = req.query;
+    const {startDate, endDate, selectInput, yearData ,monthData} = req.query;
     
-    console.log('test:',selectInput, startDate, endDate, startTime, endTime)
     if(selectInput){
       console.log('input : ', selectInput)
+      
       //  ## DAY ##################################################################
 
-      if (selectInput == 'Day' && startDate && startTime && endTime){
+      if (selectInput == 'Day' && startDate && endDate){
         let Daydate = startDate
-        console.log('เข้า if Day')
+        console.log('เข้า if Day', startDate ,endDate)
         filterfiles.findAll({
           attributes: ['id', 'type', 'name', 'data', 'helmet_count', 'not_helmet_count'],
           where: {
-            createdAt: {
-              [Op.between]: [startDate ,endDate]
-            },
-          // order: [[Sequelize.literal("createdOn"), 'ASC']],
-          // group: 'createdAt'
+            [Op.and]:{
+              createdAt: {
+                [Op.between]: [startDate ,endDate]
+              },
+              status: 1
+            }
           },
       }).then(data => {
           filterfiles.findAll({
@@ -32,11 +33,12 @@ router.get('/filter', function ( req, res ) {
                 [Sequelize.fn('SUM', Sequelize.col('not_helmet_count')), 'not_helmet_count'],
               ],
               where: {
-                createdAt: {
-                  [Op.between]: [startDate ,endDate]
-                },
-              // order: [[Sequelize.literal("createdOn"), 'ASC']],
-              // group: 'createdAt'
+                [Op.and]:{
+                  createdAt: {
+                    [Op.between]: [startDate ,endDate]
+                  },
+                  status: 1
+                }
               },
           }).then(sumcount => {
             
@@ -62,11 +64,12 @@ router.get('/filter', function ( req, res ) {
         filterfiles.findAll({
           attributes: ['id', 'type', 'name', 'data', 'helmet_count', 'not_helmet_count'],
           where: {
+            [Op.and]: {
             createdAt: {
-              [Op.between]: [startDate ,endDate]
+              [Op.between]: [startDate ,endDate],
             },
-          // order: [[Sequelize.literal("createdOn"), 'ASC']],
-          // group: 'createdAt'
+            status: 1
+          }
           },
       }).then(data => {
           filterfiles.findAll({
@@ -75,9 +78,13 @@ router.get('/filter', function ( req, res ) {
                 [Sequelize.fn('SUM', Sequelize.col('not_helmet_count')), 'not_helmet_count'],
               ],
               where: {
+                [Op.and]: {
                 createdAt: {
-                  [Op.between]: [startDate ,endDate]
+                  [Op.between]: [startDate ,endDate],
                 },
+                status: 1
+              }
+    
               // order: [[Sequelize.literal("createdOn"), 'ASC']],
               // group: 'createdAt'
               },
@@ -101,43 +108,48 @@ router.get('/filter', function ( req, res ) {
       //  ## Month ##################################################################
 
       if (selectInput == 'Month' && monthData ){
-        console.log('เข้า if Month', monthData)
+        
+        var dateObj = new Date(monthData);
+        const startMonth = dateObj.getFullYear() + "-" +(('0'+(dateObj.getMonth()+1)).slice(-2)) +"-"+ '01'
+        const endMonth = dateObj.getFullYear()+ "-"+(('0'+((dateObj.getMonth()+1)%12 + 1)).slice(-2))+ "-" + '01'
         
         filterfiles.findAll({
-          
-          attributes: ['id', 'type', 'name', 'data', 'helmet_count', 'not_helmet_count'],
+          attributes: ['id', 'type', 'name', 'data', 'helmet_count', 'not_helmet_count', 'createdAt'],
           where: {
-            [Op.and]: [
-              Sequelize.where(Sequelize.fn('Month', Sequelize.col('createdAt')), monthData),
-              Sequelize.where(Sequelize.fn('YEAR', Sequelize.col('createdAt')), monthData)
-            ]
+            [Op.and]: {
+              createdAt: {
+                [Op.between]: [startMonth , endMonth]
+              },
+              status: 1
+            }
           }
-      }).then(data => {
+        }).then(data => {
           filterfiles.findAll({
-              attributes: [
-                [Sequelize.fn('SUM', Sequelize.col('helmet_count')), 'helmet_count'],
-                [Sequelize.fn('SUM', Sequelize.col('not_helmet_count')), 'not_helmet_count'],
-              ],
-              where: {
-                createdAt:{
-                  '$gte': monthData
-                }
+            attributes:[
+              [Sequelize.fn('SUM', Sequelize.col('helmet_count')), 'helmet_count'],
+              [Sequelize.fn('SUM', Sequelize.col('not_helmet_count')), 'not_helmet_count'],
+            ],
+            where: {
+              [Op.and]: {
+                createdAt: {
+                  [Op.between]: [startMonth , endMonth]
+                },
+                status: 1
               }
+            }
           }).then(sumcount => {
-            
-              res.status(200).json({
-                  data,
-                  sumcount
-              });
+            res.status(200).json({
+              data,
+              sumcount
+            });
           })
-        })
-        .catch(error => {
-            console.log(error);
+        }).catch(error => {
+          console.log(error);
             res.status(500).json({
               message: "Error!",
               error: error
             });
-        });
+        })
       }
 
       //  ## Year  ##################################################################
@@ -146,15 +158,25 @@ router.get('/filter', function ( req, res ) {
 
         console.log('เข้า if Year', yearData)
         filterfiles.findAll({
-          attributes: ['id', 'type', 'name', 'data', 'helmet_count', 'not_helmet_count'],
-          where: Sequelize.where(Sequelize.fn('YEAR', Sequelize.col('createdAt')), yearData)
-      }).then(data => {
+          attributes: ['id', 'type', 'name', 'data', 'helmet_count', 'not_helmet_count', 'createdAt'],
+          where:{ 
+          [Op.and]:
+            [Sequelize.where(Sequelize.fn('YEAR', Sequelize.col('createdAt')), yearData)],
+            status: 1  
+          },
+
+        }).then(data => {
+          
           filterfiles.findAll({
               attributes: [
                 [Sequelize.fn('SUM', Sequelize.col('helmet_count')), 'helmet_count'],
                 [Sequelize.fn('SUM', Sequelize.col('not_helmet_count')), 'not_helmet_count'],
               ],
-              where: Sequelize.where(Sequelize.fn('YEAR', Sequelize.col('createdAt')), yearData)
+              where:{
+                [Op.and]:
+                  [Sequelize.where(Sequelize.fn('YEAR', Sequelize.col('createdAt')), yearData)],
+                  status: 1  
+              }
           }).then(sumcount => {
             
               res.status(200).json({
@@ -174,13 +196,19 @@ router.get('/filter', function ( req, res ) {
       
     } else {
     filterfiles.findAll({
-        attributes: ['id', 'type', 'name', 'data'],
+        attributes: ['id', 'type', 'name', 'data', 'helmet_count', 'not_helmet_count', 'createdAt'],
+        where:{
+          status: 1  
+        },
     }).then(data => {
         filterfiles.findAll({
           attributes: [
             [Sequelize.fn('SUM', Sequelize.col('helmet_count')), 'helmet_count'],
             [Sequelize.fn('SUM', Sequelize.col('not_helmet_count')), 'not_helmet_count'],
           ],
+          where:{
+            status: 1  
+          },
       }).then(sumcount => {
         
           res.status(200).json({
@@ -241,6 +269,42 @@ router.post('/filter', function ( req , res) {
   }
 })
 
+router.get('/getprintdata', function( req, res) {
+  const { id } = req.query;
+  filterfiles.findAll({
+    attributes: ['id', 'type', 'name', 'data', 'createdAt'],
+    where:{
+      id : id
+    },
+    }).then(data => {
+        filterfiles.findAll({
+          attributes: [
+            [Sequelize.fn('SUM', Sequelize.col('helmet_count')), 'helmet_count'],
+            [Sequelize.fn('SUM', Sequelize.col('not_helmet_count')), 'not_helmet_count'],
+          ],
+          where:{
+            
+            id : id
+            
+          },
+    }).then(sumcount => {
+      
+        res.status(200).json({
+          data,
+          sumcount
+        });
+    })
+    })
+    . catch(error => {
+        console.log(error);
+        res.status(500).json({
+          message: "Error!",
+          error: error
+        });
+    });
+
+})
+
 module.exports = router;
 
 
@@ -249,33 +313,3 @@ module.exports = router;
 
 
 
-
-
-// router.get('/filter', function ( req , res) {
-//     const startDate = req.query.startdate
-//     const test = req.query.imputdata
-//     const endDate = req.query.enddate
-//     // const spiltDATA = startDate.split("-")
-//     // const testfilter = "video/mp4"
-    
-//     console.log(startDate, endDate, test)
-
-//     filterfiles.findAll({
-//         attributes: ['id', 'type', 'name', 'data', 'status'],
-//         where: {type: test}
-//     }).then(results => {
-//         res.status(200).json({
-//             message: "Succeed",
-//             status: 200,
-//             filterfiles: results,
-//         });
-//       })
-//       . catch(error => {
-//           console.log(error);
-//           res.status(500).json({
-//             message: "Error!",
-//             error: error
-//           });
-//         });
-    
-// })

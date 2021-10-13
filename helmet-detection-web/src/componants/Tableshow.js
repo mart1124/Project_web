@@ -1,30 +1,82 @@
-import React, {useState, useRef ,useEffect} from 'react'
+import React, { useState, useRef , useEffect } from 'react';
 import { makeStyles } from '@material-ui/core/styles';
 import {Table, TableBody, TableCell, TableContainer, TableHead, 
-    TableRow, Paper, TablePagination , TableFooter, Link } from '@material-ui/core';
-// import ReactToPrint from "react-to-print";
-import ReactToPrint, { PrintContextConsumer  } from 'react-to-print';
-import PDFprint from './PDFprint';
+    TableRow, Paper, TablePagination , TableFooter} from '@mui/material';
+import axios from 'axios';
 
-const useStyles = makeStyles({
+import Notification from './Notification';
+import Controls from './Controls';
+import DeleteRoundedIcon from '@mui/icons-material/DeleteRounded';
+import PrintIcon from '@mui/icons-material/Print';
+
+import ConfirmDialog from './ConfirmDialog';
+import { borderColor, height } from '@mui/system';
+
+const useStyles = makeStyles((theme) => ({
     table: {
-      minWidth: 650,
+      marginTop : theme.spacing(3),
+      '& thead th': {
+          fontWeigh: '600',
+          color: '#f5f5f5',
+          backgroundColor: theme.palette.primary.light
+          
+      },
+      '& tbody td': {
+          fontWeigh: '300',
+      },
+      '& tbody tr:hover': {
+          backgroundColor: '#fffbf2',
+          cursor: 'pointer'
+      }
     },
-  });
+    imageshow: {
+        width: 100,
+        height: 75
+    }
+    
+  }));
 
-function Tableshow ({listVideo}) {
-    const [refPrint, setRefPrint] = React.useState();
-    const [page, setPage] = React.useState(2);
-    const [rowsPerPage, setRowsPerPage] = React.useState(10);
+function Tableshow (props) {
+    const { listVideo, setListVideo } = props
+    const [recordData, setRecordData] = React.useState(null)
+    const pages = [5, 15, 25]
+    const [page, setPage] = React.useState(0);
+    const [rowsPerPage, setRowsPerPage] = React.useState(pages[page]);
+    const [notify, setNotify] = React.useState({isOpen: false, massage:'', type:''});
+    const [confirmDialog, setConfirmDialog] = React.useState({isOpen:false , title:'', subTitle:''})
     const classes = useStyles();
-    // const handleprint = useReactToPrint ({
-    //     content: () => refPrint,
-    // });
 
+
+
+    const handleClickRemove = (event) => {
+        setListVideo({...listVideo, isReload: true})
+        axios({
+            method: 'get',
+            url: 'http://localhost:3001/removevideo',
+            params: {id: event.id}
+          })
+            .then(response => {
+                console.log(response.data.massage)
+                setConfirmDialog({
+                    ...confirmDialog,
+                    isOpen: false
+                })
+                setNotify({
+                    isOpen: true,
+                    massage: response.data.massage,
+                    type: 'success'
+                })
+                
+            })
+            .catch(err => {
+              console.error(err)
+            })
+        
+     };
     const handleClick = (event) => {
-      <PDFprint key={event.id} name={event.name} data={event.data} ref={(el)=> setRefPrint(el)} />
-       console.log(event)
-    //    window.print()
+        let{ id, name } = event
+        
+        window.open(`http://localhost:3600/print/${id}/${name}`);     
     };
 
     const handleChangePage = (event, newPage) => {
@@ -36,43 +88,58 @@ function Tableshow ({listVideo}) {
     setPage(0);
     };
 
-    return (
+    const recordsAfterPagingAndSorting = () => {
+        return listVideo.listData.data.slice(page*rowsPerPage, (page+1)*rowsPerPage)
+    }
 
-        <TableContainer component={Paper} square = "true" >
-        <Table className={classes.table} aria-label="Video table" >
+    return (
+        <>
+        <TableContainer square = "true" >
+        <Table className={classes.table} aria-label="Video table"  size="small" >
             <TableHead>
             <TableRow >
-                <TableCell align="">ID</TableCell>
-                <TableCell align="left">Type</TableCell>
-                <TableCell align="left">Name</TableCell>
-                <TableCell align="left">Url form streaming</TableCell>
-                <TableCell align="left">Action</TableCell>
+                <TableCell align="center" width='10%'>Date</TableCell>
+                <TableCell align="center" width='10%'>Time</TableCell>
+                <TableCell align="center" width='10%'>Type</TableCell>
+                <TableCell align="center">Picture</TableCell>
+                <TableCell align="center" width='20%'>Action</TableCell>
             </TableRow>
             </TableHead>
             <TableBody>
                 {
-                    listVideo.data && listVideo.data.map((item, index) => (
-                        <TableRow key={index}>
-                            <TableCell component="th" scope="row">
-                            {item.id}
+                    recordsAfterPagingAndSorting() && recordsAfterPagingAndSorting().map((item, index) => (
+                        <TableRow key={item.id}>
+                            <TableCell align="center">{item.createdAt.split(' ')[0] }</TableCell>
+                            <TableCell align="center">{item.createdAt.split(' ')[1]}</TableCell>
+                            <TableCell align="center">{item.type}</TableCell>
+                            <TableCell align="center">
+                                <img src={`http://localhost:3001/resources/upload/img/${item.name}`} alt="image-Show" className={classes.imageshow} />
                             </TableCell>
-                            <TableCell >{item.type}</TableCell>
-                            <TableCell >{item.name}</TableCell>
-                            <TableCell >{item.data}</TableCell>
                             
-                            <TableCell > 
-                                {/* <ReactToPrint  
-
-                                /> */}
-                                <Link 
-                                    href="#" 
-                                    variant="body2"
-                                    underline="always"
-                                    onClick={(e) => handleClick(item, e)}>
-                                    Print PDF
-                                </Link>
+                            <TableCell align="center">
+                                {/* Delete Button */}
+                                <Controls.ActionButton
+                                    color="secondary" 
+                                    onClick={() => 
+                                        setConfirmDialog({
+                                            isOpen: true,
+                                            title: "Are you sure you want to delete ?",
+                                            subTitle: "You can't undo this operation",    
+                                            onConfirm: () => { handleClickRemove(item) }
+                                    })}> 
+                                    
+                                    <DeleteRoundedIcon color='error'/>
+                                </Controls.ActionButton>
+                                {/* Print Button */}
+                                <Controls.ActionButton
+                                    color='primary'
+                                    onClick={() => {
+                                        handleClick(item)
+                                    }} >
+                                    <PrintIcon />
+                                </Controls.ActionButton>
                                 
-
+                                
                             </TableCell>
             
                         </TableRow>
@@ -83,10 +150,9 @@ function Tableshow ({listVideo}) {
             <TableFooter>
             <TableRow>
                 <TablePagination
-                rowsPerPageOptions={[5, 10, 25, { label: 'All', value: -1 }]}
-                colSpan={3}
-                count={listVideo.data.length}
+                rowsPerPageOptions={pages}
                 rowsPerPage={rowsPerPage}
+                count={listVideo.listData.data.length}
                 page={page}
                 SelectProps={{
                     inputProps: {
@@ -100,33 +166,18 @@ function Tableshow ({listVideo}) {
             </TableRow>
             </TableFooter>
             </Table>
+            
         </TableContainer>
-        
+        <Notification 
+            notify = {notify}
+            setNotify = {setNotify}
+        />
+        <ConfirmDialog 
+            confirmDialog={confirmDialog}
+            setConfirmDialog={setConfirmDialog}
+        />
+        </>
     )
 }
 
 export default Tableshow
-
-// listVideo.data && listVideo.data.map((item, index) => (
-//     <TableRow key={item.id}>
-//         <TableCell component="th" scope="row">
-//         {item.id}
-//         </TableCell>
-//         <TableCell >{item.type}</TableCell>
-//         <TableCell >{item.name}</TableCell>
-//         <TableCell >{item.data}</TableCell>
-        
-//         <TableCell > 
-//             {/* <ReactToPrint
-//                 key={item.id} 
-//                 trigger={() =>  <a href="#" >Print PDF</a> } /> */}
-            
-//             <a  key={item.id} href="#" onClick={handlePrint([item])} >Print PDF</a>
-//             {/* <div style={{display:'none'}} >
-//             <PDFprint key={item.id} name={item.name} data={item.data}
-//             />
-//             </div> */}
-            
-//         </TableCell>
-
-//     </TableRow>

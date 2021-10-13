@@ -1,5 +1,7 @@
 const router = require('express').Router();
 const velifytoken = require('../middleware/verifyToken');
+const db = require('../models');
+const filterfiles = db.files;
 
 
 router.get('/auth', velifytoken, (req, res) => {
@@ -22,10 +24,26 @@ router.get('/auth', velifytoken, (req, res) => {
    
 });
 
-// router.get('/home', (req, res) => {
-//     return res.json({
-//         massage: "Admin_HomePage"
-//     })
-// });
+router.get('/removevideo', async function(req, res, next) {
+    const { id } = req.query
+
+    const updateFile = await filterfiles.findOne({
+        where: {
+            id: id
+        }
+    })
+    if (!updateFile) {
+        return res.status(400).json({
+            message: "Not find ID_file.",
+            status: 400
+        });
+    }
+
+    updateFile.update({status: 0})
+    return res.status(200).json({
+        massage: 'Successfully deleted the file.',
+        status: 200
+    })
+})
 
 module.exports = router;

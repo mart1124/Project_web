@@ -1,11 +1,15 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import App from './App';
+import Nevbar from './componants/Nevbar';
 import './index.css';
 
 const rootElement = document.getElementById("root");
 ReactDOM.render(
     <React.StrictMode>
+    
+    {/* <Nevbar /> */}
+    
     <App />
     </React.StrictMode>, 
     rootElement

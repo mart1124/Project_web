@@ -4,7 +4,7 @@ import axios from 'axios'
 import { Button, Container, CssBaseline, TextField,
     Paper, Link, Typography} from '@mui/material';
 import { makeStyles } from '@material-ui/core/styles';
-import { userSchema } from './validations/UserValidate.js'
+import { userSchema } from '../componants/validations/UserValidate.js'
 import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 

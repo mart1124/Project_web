@@ -11,7 +11,8 @@ const steram = require('./src/routes/stream');
 const filter = require('./src/routes/sorting');
 const userRoutes = require('./src/routes/userRoutes');
 const home = require('./src/routes/home');
-const velifytoken = require('./src/middleware/verifyToken'); 
+const imageSorting = require('./src/routes/imageSorting') 
+const imageView = require('./src/routes/imageView')
 var cors = require('cors')
 
 global.__basedir = __dirname;
@@ -27,9 +28,12 @@ app.post("/upload-config", uploadCon.uploadConfig);
 app.post("/api/upload", upload.single('file'), uploadCon.uploadFiles);
 app.post("/api/uploadimg", upload.single('file'), uploadCon.uploadImgFiles);
 app.use("/api/stream", steram);
+app.use("/api/display", imageView);
 app.use("/api", filter);
+app.use("/api", imageSorting);
 app.use("/api", userRoutes);
 app.use("/", home);
+app.use('/resources/upload/img', express.static( __basedir + "/resources/upload/img" ));
 
 let port = 3001;
 

@@ -6,7 +6,6 @@ import { Button, Container, CssBaseline, TextField,
     Paper, Alert , Link, Typography} from '@mui/material';
 import { makeStyles} from '@material-ui/core/styles';
 
-// axios.defaults.withCredentials = true;
 
 const useStyles = makeStyles((theme) => ({
     root: {
