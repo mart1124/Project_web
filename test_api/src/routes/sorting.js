@@ -6,10 +6,10 @@ const { Op, Sequelize } = require("sequelize");
 
 // GET เอาไว้ เรียกข้อมูลไปแสดง และ ค้นหาข้อมูล
 router.get('/filter', function ( req, res ) {
-    const {startDate, endDate, selectInput, yearData ,monthData} = req.query;
+    const {startDate, endDate, selectInput, yearData ,monthData ,startFetch} = req.query;
     
-    if(selectInput){
-      console.log('input : ', selectInput)
+    if(startDate || endDate || selectInput === 'Year' && yearData ||selectInput == 'Month' && monthData){
+      console.log('input : ', startDate, endDate, selectInput, yearData ,monthData)
       
       //  ## DAY ##################################################################
 
@@ -17,7 +17,7 @@ router.get('/filter', function ( req, res ) {
         let Daydate = startDate
         console.log('เข้า if Day', startDate ,endDate)
         filterfiles.findAll({
-          attributes: ['id', 'type', 'name', 'data', 'helmet_count', 'not_helmet_count'],
+          attributes: ['id', 'type', 'name', 'data', 'helmet_count', 'not_helmet_count', 'createdAt'],
           where: {
             [Op.and]:{
               createdAt: {
@@ -62,7 +62,7 @@ router.get('/filter', function ( req, res ) {
       if (selectInput == 'Week' && startDate && endDate){
         console.log('เข้า if Week')
         filterfiles.findAll({
-          attributes: ['id', 'type', 'name', 'data', 'helmet_count', 'not_helmet_count'],
+          attributes: ['id', 'type', 'name', 'data', 'helmet_count', 'not_helmet_count', 'createdAt'],
           where: {
             [Op.and]: {
             createdAt: {
@@ -210,7 +210,6 @@ router.get('/filter', function ( req, res ) {
             status: 1  
           },
       }).then(sumcount => {
-        
           res.status(200).json({
             data,
             sumcount
@@ -268,6 +267,11 @@ router.post('/filter', function ( req , res) {
       });
   }
 })
+
+
+/* 
+    ======== Print ======== 
+*/
 
 router.get('/getprintdata', function( req, res) {
   const { id } = req.query;

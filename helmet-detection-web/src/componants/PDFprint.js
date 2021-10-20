@@ -22,8 +22,13 @@ const useStyles = makeStyles(theme => ({
     },
     imageshow:{
         width: 560,
-        height: 320
-    }
+        height: 320,
+        [theme.breakpoints.down(480)]: {
+            width: 300,
+            height: 180,
+        },
+    },
+    
 
 }))
 
@@ -116,7 +121,10 @@ function PDFprint() {
                         </Grid>
                     </Grid>
                     {/* {displayImage} */}
-                    <img src={"http://localhost:3001/resources/upload/img/" + namepic} alt="image-Show" className={classes.imageshow} />
+                    <Grid item xs={12} marginTop={4}>
+                    <img src={"http://localhost:3001/resources/upload/img/" + namepic} alt="image-Show" className={classes.imageshow} /> 
+                    </Grid>
+                    
                 </Grid>
             </Container>
         </React.Fragment>

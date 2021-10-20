@@ -20,8 +20,8 @@ router.get('/*',function (req, res) {
         const start = parseInt(parts[0],10);
         const end = parts[1] ? parseInt(parts[1], 10) : fileSize-1;
         const chunkSize = (end - start) + 1;
-        console.log(parts,start,end,chunkSize);
-        // const file = fs.createReadStream(filepath, {start, end} );
+        // console.log(parts,start,end,chunkSize);
+        const file = fs.createReadStream(filepath, {start, end} );
         const head = {
             'Content-Range' : `bytes ${start}-${end}/${fileSize}`,
             'Accept-Ranges' : 'bytes',
@@ -29,13 +29,13 @@ router.get('/*',function (req, res) {
             'Content-Type' : 'video/mp4' 
         }
         res.writeHead(206,head);
-        const file = fs.createReadStream(filepath, {start, end} )
-            .on("open", function() {
-                file.pipe(res);
-            }).on("error", function(err) {
-                res.end(err);
-            });
-        // file.pipe(res);
+        // const file = fs.createReadStream(filepath, {start, end} )
+        //     .on("open", function() {
+        //         file.pipe(res);
+        //     }).on("error", function(err) {
+        //         res.end(err);
+        //     });
+        file.pipe(res);
         // console.log(head);
     } else {
         console.log("ส่วน 2");

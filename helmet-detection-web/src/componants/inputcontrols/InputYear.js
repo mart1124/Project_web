@@ -111,13 +111,13 @@ const InputYear = (props) => {
                     <Typography> Wear a helmet </Typography>
                 </Grid>
                 <Grid item xs={3} className={classes.griditem} >
-                    <Typography>{sumCount.helmet_count}</Typography>  
+                    <Typography fontWeight={600}>{sumCount.helmet_count}</Typography>  
                 </Grid>
                 <Grid item xs={3} className={classes.griditem}>
                     <Typography > Not wear a helmet</Typography>
                 </Grid>
                 <Grid item xs={3} className={classes.griditem}>
-                    <Typography >{sumCount.not_helmet_count} </Typography>
+                    <Typography fontWeight={600}>{sumCount.not_helmet_count} </Typography>
                 </Grid>
             </Grid>
         </>

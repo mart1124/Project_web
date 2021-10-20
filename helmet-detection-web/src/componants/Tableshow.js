@@ -1,7 +1,7 @@
-import React, { useState, useRef , useEffect } from 'react';
+import React, { useState } from 'react';
 import { makeStyles } from '@material-ui/core/styles';
 import {Table, TableBody, TableCell, TableContainer, TableHead, 
-    TableRow, Paper, TablePagination , TableFooter} from '@mui/material';
+    TableRow, TablePagination , TableFooter} from '@mui/material';
 import axios from 'axios';
 
 import Notification from './Notification';
@@ -10,7 +10,9 @@ import DeleteRoundedIcon from '@mui/icons-material/DeleteRounded';
 import PrintIcon from '@mui/icons-material/Print';
 
 import ConfirmDialog from './ConfirmDialog';
-import { borderColor, height } from '@mui/system';
+import Popup from './Popup';
+import DisplayImage from './DisplayImage';
+
 
 const useStyles = makeStyles((theme) => ({
     table: {
@@ -32,20 +34,20 @@ const useStyles = makeStyles((theme) => ({
     imageshow: {
         width: 100,
         height: 75
-    }
-    
+    },
+   
   }));
 
 function Tableshow (props) {
-    const { listVideo, setListVideo } = props
-    const [recordData, setRecordData] = React.useState(null)
+    const { listVideo, setListVideo , onRemove , user} = props
+    const [recordData, setRecordData] = React.useState()
     const pages = [5, 15, 25]
     const [page, setPage] = React.useState(0);
     const [rowsPerPage, setRowsPerPage] = React.useState(pages[page]);
     const [notify, setNotify] = React.useState({isOpen: false, massage:'', type:''});
     const [confirmDialog, setConfirmDialog] = React.useState({isOpen:false , title:'', subTitle:''})
+    const [openPopup, setOpenPopup] = useState()
     const classes = useStyles();
-
 
 
     const handleClickRemove = (event) => {
@@ -66,6 +68,7 @@ function Tableshow (props) {
                     massage: response.data.massage,
                     type: 'success'
                 })
+                onRemove(true)
                 
             })
             .catch(err => {
@@ -75,9 +78,13 @@ function Tableshow (props) {
      };
     const handleClick = (event) => {
         let{ id, name } = event
-        
         window.open(`http://localhost:3600/print/${id}/${name}`);     
     };
+
+    const openInPopup = pictureName => {
+        setRecordData(pictureName)
+        setOpenPopup(true)
+    }
 
     const handleChangePage = (event, newPage) => {
         setPage(newPage);
@@ -113,12 +120,23 @@ function Tableshow (props) {
                             <TableCell align="center">{item.createdAt.split(' ')[1]}</TableCell>
                             <TableCell align="center">{item.type}</TableCell>
                             <TableCell align="center">
-                                <img src={`http://localhost:3001/resources/upload/img/${item.name}`} alt="image-Show" className={classes.imageshow} />
+                                
+                                <Controls.ActionButton
+                                    variant="text"
+                                    color="primary"
+                                    onClick={() => {openInPopup(item.name)}} >
+                                    <img src={`http://localhost:3001/resources/upload/img/${item.name}`} alt="image-Show" className={classes.imageshow} />
+                                </Controls.ActionButton>
+                                
                             </TableCell>
                             
                             <TableCell align="center">
-                                {/* Delete Button */}
+                               
+                                {
+                                user ? (
+                                <>
                                 <Controls.ActionButton
+                                    variant="text"
                                     color="secondary" 
                                     onClick={() => 
                                         setConfirmDialog({
@@ -128,22 +146,30 @@ function Tableshow (props) {
                                             onConfirm: () => { handleClickRemove(item) }
                                     })}> 
                                     
-                                    <DeleteRoundedIcon color='error'/>
+                                    <DeleteRoundedIcon sx={{ fontSize: 28 }} color='error'/>
                                 </Controls.ActionButton>
-                                {/* Print Button */}
                                 <Controls.ActionButton
+                                    variant="text"
                                     color='primary'
                                     onClick={() => {
                                         handleClick(item)
                                     }} >
-                                    <PrintIcon />
+                                    <PrintIcon sx={{ fontSize: 28 }}  />
                                 </Controls.ActionButton>
-                                
+                            </>
+                            ): 
+                            <Controls.ActionButton
+                                variant="text"
+                                color='primary'
+                                onClick={() => {
+                                    handleClick(item)
+                                }} >
+                                <PrintIcon sx={{ fontSize: 28 }}  />
+                            </Controls.ActionButton>
+                        }
                                 
                             </TableCell>
-            
                         </TableRow>
-                        
                     ))
                 }
             </TableBody>
@@ -176,6 +202,13 @@ function Tableshow (props) {
             confirmDialog={confirmDialog}
             setConfirmDialog={setConfirmDialog}
         />
+        <Popup 
+            title='HelmetDetection'
+            openPopup={openPopup}
+            setOpenPopup={setOpenPopup}
+        >
+            <DisplayImage recordData={recordData} />
+        </Popup>
         </>
     )
 }

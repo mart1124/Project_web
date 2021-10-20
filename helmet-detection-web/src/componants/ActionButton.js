@@ -24,13 +24,15 @@ const useStytes = makeStyles((theme) => ({
 
 function ActionButton(props) {
 
-    const { color, children, onClick} = props;
+    const { color, children, variant, onClick} = props;
     const classes = useStytes();
 
     return (
         
         <Button
+            variant={ variant || "contained"}
             className={`${classes.root} ${classes[color]}`}
+            color={color}
             onClick={onClick}
         >
             {children}

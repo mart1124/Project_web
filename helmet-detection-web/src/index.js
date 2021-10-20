@@ -7,9 +7,6 @@ import './index.css';
 const rootElement = document.getElementById("root");
 ReactDOM.render(
     <React.StrictMode>
-    
-    {/* <Nevbar /> */}
-    
     <App />
     </React.StrictMode>, 
     rootElement

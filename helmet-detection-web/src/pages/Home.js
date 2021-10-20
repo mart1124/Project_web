@@ -5,9 +5,8 @@ import Tableshow from '../componants/Tableshow';
 import axios from 'axios'
 import { makeStyles } from '@material-ui/core/styles';
 import { Button, Container, MenuItem ,
-    Paper, Grid, Select, Typography, CssBaseline, Card, CardHeader, CardContent } from '@mui/material';
+    Paper, Grid, Select, Typography, CssBaseline } from '@mui/material';
 import InputControls from '../componants/inputcontrols/InputControls'
-import { Box } from '@mui/system';
 
 
 const useStyles = makeStyles((theme) => ({
@@ -52,45 +51,25 @@ const useStyles = makeStyles((theme) => ({
         justifyContent: 'center',
     },
     text: {
-        marginLeft: theme.spacing(2),
-        marginRight: theme.spacing(2),
+        fontWeight: 600
     },
     
 }));
 
 const Home = props => {
+    const { user } = props
     const [startDate, setStartDate] = useState(null);
     const [endDate, setEndDate] = useState(null);
     const [monthData, setMonthData] = useState(new Date());
     const [yearData, setYearData] = useState(new Date());
-    
+    const [onRemove, setOnRemove] = useState(false)
     const [tebleData, setTebleData] = useState( {isReload: false, listData: ''});
     const [isLoaded, setIsLoaded] = useState(false);
     const [selectInput, setSelectInput] = useState("Day");
     const [sumCount, setSumCount] = useState([]);
     const classes = useStyles();
 
-
-    useEffect(() => {
-        const fetchData = async () => {
-            const { data } = await axios('http://localhost:3001/api/filter');
-            const responseData = data.data
-            const responseSum = data.sumcount[0]
-            console.log(responseData.createdAt)
-            setSumCount(responseSum);
-            setTebleData({
-                ...tebleData,
-                listData: data
-            });
-            setIsLoaded(true);
-            
-        }
-        fetchData();
-        
-    }, []);
-
-    function getVideoFilter(){
-        
+    async function fetchData(){
         axios({
             method: 'get',
             url: 'http://localhost:3001/api/filter',
@@ -105,20 +84,32 @@ const Home = props => {
                     isReload: false,
                 })
                 setSumCount(responseCount)
+                setIsLoaded(true);
             })
             .catch(err => {
               console.error(err)
             })
     }
-    
+
+    useEffect(() => {
+        
+        if (onRemove === true) {
+            setOnRemove(false)
+        }
+        fetchData();
+        
+    }, [onRemove]);
+
+
     if (isLoaded !== true){
-       return <div>isLoaded..</div>
+       return <div></div>
     }
     if (selectInput === 'Day'){
       return (
        <Container className={classes.root} maxWidth='xl'>
-           <CssBaseline />
+           
             <Grid container >
+            <CssBaseline />
             <Grid container component={Paper}  square xs={12} className={classes.grid} >
             
                 <Grid item xs={5} sm={5} md={2} margin={2}>
@@ -148,7 +139,7 @@ const Home = props => {
                         onChange={(date) => setStartDate(date)}
                         showTimeSelect
                         timeFormat="HH:mm"
-                        timeIntervals={15}
+                        timeIntervals={5}
                         timeCaption="time"
                         dateFormat ="yyyy-MM-dd HH:mm"
                         showMonthDropdown />
@@ -164,7 +155,7 @@ const Home = props => {
                             showTimeSelect
                             includeDates={[startDate]}
                             timeFormat="HH:mm"
-                            timeIntervals={15}
+                            timeIntervals={5}
                             timeCaption="time"
                             dateFormat ="yyyy-MM-dd HH:mm"
                             showMonthDropdown />  
@@ -176,7 +167,7 @@ const Home = props => {
                         variant="contained"
                         color="primary"
                         onClick={() => {
-                            getVideoFilter()
+                            fetchData()
                         }}>ค้นหา</Button>
                 </Grid>
             </Grid>
@@ -186,17 +177,17 @@ const Home = props => {
                     <Typography component='div'> Wear a helmet </Typography>
                 </Grid>
                 <Grid item xs={3} className={classes.griditem} >
-                    <Typography component='div'>{sumCount.helmet_count}</Typography>  
+                    <Typography component='div' fontWeight={600}>{sumCount.helmet_count}</Typography>  
                 </Grid>
                 <Grid item xs={3}  className={classes.griditem}>
                     <Typography component='div'> Not wear a helmet</Typography>
                 </Grid>
                 <Grid item xs={3} className={classes.griditem}>
-                    <Typography component='div'>{sumCount.not_helmet_count} </Typography>
+                    <Typography component='div' fontWeight={600}>{sumCount.not_helmet_count} </Typography>
                 </Grid>
             </Grid>
-            <Grid container component={Paper} square xs={12} align='right' padding={3}>
-                < Tableshow listVideo={tebleData} setListVideo={setTebleData} />      
+            <Grid container component={Paper} square  align='right' padding={3}>
+                < Tableshow listVideo={tebleData} setListVideo={setTebleData} onRemove={setOnRemove} user={user} />      
             </Grid>
         </Grid>
         </Container>
@@ -216,10 +207,10 @@ const Home = props => {
                         setStartDate={setStartDate}
                         endDate={endDate}
                         setEndDate={setEndDate}
-                        onClick={() => getVideoFilter()}
+                        onClick={() => fetchData()}
                         />
                 <Grid container component={Paper} square xs={12} align='center' padding={3}>
-                    < Tableshow listVideo={tebleData} setListVideo={setTebleData} /> 
+                    < Tableshow listVideo={tebleData} setListVideo={setTebleData} onRemove={setOnRemove} user={user}  /> 
                 </Grid>
                 </Grid>
             </Container>
@@ -238,10 +229,10 @@ const Home = props => {
                         sumCount={sumCount}
                         monthData={monthData}
                         setMonthData={setMonthData}
-                        onClick={() => getVideoFilter()}
+                        onClick={() => fetchData()}
                         />
                 <Grid container component={Paper} square xs={12} align='center' padding={3}>
-                    < Tableshow listVideo={tebleData} setListVideo={setTebleData} /> 
+                    < Tableshow listVideo={tebleData} setListVideo={setTebleData} onRemove={setOnRemove} user={user} /> 
                 </Grid>
                 </Grid>
             </Container>
@@ -259,10 +250,10 @@ const Home = props => {
                         sumCount={sumCount}
                         yearData={yearData}
                         setYearData={setYearData}
-                        onClick={() => getVideoFilter()}
+                        onClick={() => fetchData()}
                         />
                 <Grid container component={Paper} square xs={12} align='center' padding={3}>
-                    < Tableshow listVideo={tebleData} setListVideo={setTebleData} /> 
+                    < Tableshow listVideo={tebleData} setListVideo={setTebleData} onRemove={setOnRemove} user={user} /> 
                 </Grid>
                 </Grid>
             </Container>
@@ -343,7 +334,7 @@ const Home = props => {
                             type="submit"
                             variant="contained"
                             color="primary"
-                            onClick={() => {getVideoFilter()}}>
+                            onClick={() => {fetchData()}}>
                             ค้นหา
                         </Button>
                     </Grid>

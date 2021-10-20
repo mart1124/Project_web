@@ -107,7 +107,7 @@ router.post('/login', async function(req, res, next){
             status: 400
         });
     }
-    const valididUser = await bcrypt.compareSync(epass, users.idUser)  //เปรียบเทียบ ค่า ที่ได้จากการ login กับ idUser
+    const valididUser = bcrypt.compareSync(epass, users.idUser)  //เปรียบเทียบ ค่า ที่ได้จากการ login กับ idUser
     if (!valididUser) {
         return res.status(400).json({
             auth: false,
@@ -134,5 +134,50 @@ router.post('/login', async function(req, res, next){
          })
 
 });
+
+/* 
+    ======== GET User ======== 
+*/
+
+router.get('/getuser', async function(req, res, next){
+    user.findAll({ 
+        attributes: ['id','name', 'email', 'permission'],
+    }).then( userData => {
+        res.status(200).json({
+            userData
+        })
+    }).catch(error => {
+        res.status(500).json({
+          message: "Error!",
+          error: error
+        });
+    });
+})
+
+
+/* 
+    ======== DELETE User ======== 
+*/
+
+router.delete('/delete', async function(req, res, next){
+    const { id } = req.query
+    user.destroy({
+        where: {
+           id: id 
+        }
+     }).then(function(rowDeleted){ 
+       if(rowDeleted === 1){
+        res.status(200).json({
+            status : 200,
+            massage: 'Deleted successfully'
+        })
+        }
+     }, function(err){
+        res.status(500).json({
+            message: "Error!",
+            error: err
+        });
+     });
+})
 
 module.exports = router;

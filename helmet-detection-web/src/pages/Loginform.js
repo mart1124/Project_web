@@ -1,10 +1,11 @@
-import React from 'react';
-import { useHistory } from "react-router-dom";
+import React, { useEffect, useRef } from 'react';
+import { useHistory, withRouter } from "react-router-dom";
 import { useState } from 'react';
 import axios from 'axios'
 import { Button, Container, CssBaseline, TextField,
     Paper, Alert , Link, Typography} from '@mui/material';
 import { makeStyles} from '@material-ui/core/styles';
+
 
 
 const useStyles = makeStyles((theme) => ({
@@ -53,33 +54,45 @@ const useStyles = makeStyles((theme) => ({
   }));
 
 const Loginform = props => {
+    const { setToken, setUserRole } = props
     const [email, setEmail] = useState("");
-    const [password, setPassword] = useState("");;
+    const [password, setPassword] = useState("");
     const [alert, setAlert] = useState(false);
     const [alertContent, setAlertContent] = useState('');
+    const [loginComplate, setLoginComplate] = useState(false);
     const classes = useStyles();
     const history = useHistory();
+   
     
 
-    function userLogin(){
-        axios
+    // useEffect(() => {
+    //     userLogin()
+    // }, []);
+
+    const userLogin = async() => {
+        setLoginComplate(true);
+        await axios
             .post("http://localhost:3001/api/login", { email: email, password: password }, { validateStatus: function (status) {
                 return status < 500; // Reject only if the status code is greater than or equal to 500
               } })
             .then(response => {
-    
+                
                 if (response.status === 200 && response.data.auth === true){
-                    let authstatus = response.data.auth
+                    const authstatus = response.data.auth
+                    const userToken = response.data.token
+                    console.log(userToken)
+                    setToken(userToken)
                     axios('http://localhost:3001/auth', { 
                         params: {authstatus},
                         headers: {
-                            Authorization: response.data.token
+                            Authorization: userToken
                         }
                     }).then((res) => {
                         if(res.status === 200){ 
-                            let path = `/`; 
-                            history.push(path); 
-                            console.log(res) 
+                            setUserRole("admin")
+                            setLoginComplate(false);
+                            history.push('/');
+                       
                         } else {
                             console.log(res)
                         }
@@ -94,11 +107,12 @@ const Loginform = props => {
                 
             })
             .catch(err => {
-                alert(err)
                 console.error(err)
             })
+            
     }
 
+     
     return (
         <Container component="main" maxWidth="md" >
             <CssBaseline />
@@ -142,13 +156,7 @@ const Loginform = props => {
                     >
                         Sign In
                     </Button>
-                    <hr />
-                    <Typography >
-                        Create a new Account ? &nbsp;
-                        <Link href="/admin/register">
-                            Sign Up
-                        </Link>
-                    </Typography>
+                    {/* <hr /> */}
                 </Paper>
             </div>
         </Container>
@@ -156,4 +164,4 @@ const Loginform = props => {
     )
 }
 
-export default Loginform;
+export default withRouter(Loginform);

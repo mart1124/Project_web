@@ -1,8 +1,6 @@
-import React, {Fragment} from 'react'
-import { useHistory } from "react-router-dom";
+import React, { useState, Fragment} from 'react'
 import axios from 'axios'
-import { Button, Container, CssBaseline, TextField,
-    Paper, Link, Typography} from '@mui/material';
+import { Button,CssBaseline, TextField, Alert} from '@mui/material';
 import { makeStyles } from '@material-ui/core/styles';
 import { userSchema } from '../componants/validations/UserValidate.js'
 import { useForm } from 'react-hook-form';
@@ -21,6 +19,7 @@ const useStyles = makeStyles((theme) => ({
       },
     layout: {
         width: 'auto',
+        textAlign: "center",
         marginLeft: theme.spacing(2),
         marginRight: theme.spacing(2),
         [theme.breakpoints.up(350 + theme.spacing(2) * 2)]: {
@@ -54,9 +53,11 @@ const useStyles = makeStyles((theme) => ({
   }));
 
 
-const Register = () => {
+const Register = (props) => {
     const classes = useStyles();
-    const history = useHistory();
+    const { setOpenPopup, setOnAddUser } = props
+    const [alert, setAlert] = useState(false);
+    const [alertContent, setAlertContent] = useState('');
     const {
         register,
         handleSubmit,
@@ -69,33 +70,34 @@ const Register = () => {
             ======== ส่ง data ไป Register ======== 
         */
         axios
-            .post("http://localhost:3001/api/register", { data })
+            .post("http://localhost:3001/api/register", { data },{ validateStatus: function (status) {
+                return status < 500; // Reject only if the status code is greater than or equal to 500
+              } })
             .then(response => {
-                // เปิดหน้า Login
-                if(response.status === 200){   
-                    let path = `/admin/login`; 
-                    history.push(path); 
-                    console.log(response) 
-                } else {
-                    console.log(response)
-                }
                 console.log(response)
+                if (response.status === 200) {
+                    setOpenPopup(false)
+                    setOnAddUser(true)
+                    
+                }
+                
+                if (response.status === 409){
+                    setAlertContent(response.data.message);
+                    setAlert(true);
+                }
             })
             .catch(err => {
-               return Promise.reject(err);
+            //    return Promise.reject(err);
+                console.error(err)
             })
     }
 
     return (
 
         <Fragment>
-        <Container component="main" maxWidth="md" >
+        {/* <Container component="main" maxWidth="md" > */}
             <CssBaseline />
             <div className={classes.layout}>
-                <Paper className={classes.paper}>
-                    <Typography component="h1" variant="h5">
-                        User Register
-                    </Typography>
                     <TextField
                         variant="outlined"
                         margin="normal"
@@ -145,6 +147,9 @@ const Register = () => {
                         error={errors.confirmPassword ? true : false}
                         helperText={errors.confirmPassword?.message}
                     />
+                    {alert ? <Alert severity='error' onClose={() => setAlert(null)} >
+                        {alertContent}  </Alert> : <></> }
+                        <br />
                     <Button
                         type="submit"
                         variant="contained"
@@ -157,15 +162,15 @@ const Register = () => {
                         Sign Up
                     </Button>
                     <hr />
-                    <Typography >
+                    {/* <Typography >
                         Have an Account ? &nbsp;
                         <Link href="/admin/login">
                             Sing In 
                         </Link>
-                    </Typography>
-                </Paper>
+                    </Typography> */}
+                {/* </Paper> */}
             </div>
-        </Container>
+        {/* </Container> */}
         </Fragment>      
     )
 }
