@@ -12,6 +12,7 @@ import PrintIcon from '@mui/icons-material/Print';
 import ConfirmDialog from './ConfirmDialog';
 import Popup from './Popup';
 import DisplayImage from './DisplayImage';
+import DisplayVideo from './DisplayVideo';
 
 
 const useStyles = makeStyles((theme) => ({
@@ -40,7 +41,7 @@ const useStyles = makeStyles((theme) => ({
 
 function Tableshow (props) {
     const { listVideo, setListVideo , onRemove , user} = props
-    const [recordData, setRecordData] = React.useState()
+    const [recordData, setRecordData] = React.useState({type: '', itemName: ''})
     const pages = [5, 15, 25]
     const [page, setPage] = React.useState(0);
     const [rowsPerPage, setRowsPerPage] = React.useState(pages[page]);
@@ -58,7 +59,6 @@ function Tableshow (props) {
             params: {id: event.id}
           })
             .then(response => {
-                console.log(response.data.massage)
                 setConfirmDialog({
                     ...confirmDialog,
                     isOpen: false
@@ -81,8 +81,11 @@ function Tableshow (props) {
         window.open(`http://localhost:3600/print/${id}/${name}`);     
     };
 
-    const openInPopup = pictureName => {
-        setRecordData(pictureName)
+    const openInPopup = displayItem => {
+        setRecordData({
+            type: displayItem.type,
+            dataName: displayItem.name
+        })
         setOpenPopup(true)
     }
 
@@ -120,13 +123,23 @@ function Tableshow (props) {
                             <TableCell align="center">{item.createdAt.split(' ')[1]}</TableCell>
                             <TableCell align="center">{item.type}</TableCell>
                             <TableCell align="center">
+                                {
+                                    item.type === "image/jpeg"  ?(
+                                    <Controls.ActionButton
+                                        variant="text"
+                                        color="primary"
+                                        onClick={() => {openInPopup(item)}} >
+                                        <img src={`http://localhost:3001/resources/upload/img/${item.name}`} alt="image-Show" className={classes.imageshow} />
+                                    </Controls.ActionButton>
+                                    ) : 
+                                    <Controls.ActionButton
+                                        variant="text"
+                                        color="primary"
+                                        onClick={() => {openInPopup(item)}} >
+                                        VIDEO
+                                    </Controls.ActionButton>
+                                }
                                 
-                                <Controls.ActionButton
-                                    variant="text"
-                                    color="primary"
-                                    onClick={() => {openInPopup(item.name)}} >
-                                    <img src={`http://localhost:3001/resources/upload/img/${item.name}`} alt="image-Show" className={classes.imageshow} />
-                                </Controls.ActionButton>
                                 
                             </TableCell>
                             
@@ -207,7 +220,12 @@ function Tableshow (props) {
             openPopup={openPopup}
             setOpenPopup={setOpenPopup}
         >
-            <DisplayImage recordData={recordData} />
+        { 
+          recordData.type === "image/jpeg" ? ( 
+            <DisplayImage recordData={recordData} />  
+            ): <DisplayVideo recordData={recordData} />
+        }
+            
         </Popup>
         </>
     )

@@ -11,6 +11,7 @@ import useToken  from './componants/validations/useToken';
 import RecoverData from './pages/RecoverData';
 import ProtectedRoute from './componants/validations/ProtectedRoute';
 import Unauthorized from './componants/Unauthorized ';
+import DisplayVideo from './componants/DisplayVideo';
 
 
 
@@ -26,6 +27,7 @@ function App() {
         <Switch>
           <Route path="/print/:id/:namepic" component= {PDFprint} />
           <Route exact path='/unauthorized' component={Unauthorized} />
+          <Route exact path="/display/video/:videoname" component={DisplayVideo} />    
           <div>
             <Nevbar havetoken={token} />
             <Route exact path="/" >

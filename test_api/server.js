@@ -14,6 +14,7 @@ const home = require('./src/routes/home');
 const imageSorting = require('./src/routes/imageSorting') 
 const imageView = require('./src/routes/imageView')
 const recoverData = require('./src/routes/recoverData')
+const videoPoster = require('./src/routes/videoPoster')
 var cors = require('cors')
 
 global.__basedir = __dirname;
@@ -34,6 +35,7 @@ app.use("/api", filter);
 app.use("/api", imageSorting);
 app.use("/api", userRoutes);
 app.use("/api", recoverData);
+app.use("/api", videoPoster);
 app.use("/", home);
 app.use('/resources/upload/img', express.static( __basedir + "/resources/upload/img" ));
 

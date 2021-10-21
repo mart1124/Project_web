@@ -12,12 +12,11 @@ const useStyles = makeStyles((theme) => ({
 
 export default function DisplayImage(props) {
 
-    const { recordData, setRecordData } = props
+    const { recordData } = props
     const classes = useStyles();
-
     return (
         <div>
-            <img src={`http://localhost:3001/resources/upload/img/${recordData}`} alt="image-Show" className={classes.imageshow} />
+            <img src={`http://localhost:3001/resources/upload/img/${recordData.dataName}`} alt="image-Show" className={classes.imageshow} />
         </div>
     )
 }

@@ -1,13 +1,13 @@
 import React from 'react'
 
-function DisplayVideo(prop) {
+function DisplayVideo(props) {
 
-    const { id } = props
+    const { recordData } = props
     
     return (
         <div>
             <video width="750" height="500" controls >
-                <source src="./Videos/video1.mp4" type="video/mp4"/>
+                <source src={`http://localhost:3600//api/stream/${recordData.dataName}`} type="video/mp4"/>
             </video>
         </div>
     )

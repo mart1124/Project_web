@@ -2,12 +2,11 @@ const express = require('express');
 const router = express.Router();
 const fs = require('fs')
 const path = require('path');
+const thumbsupply = require('thumbsupply');
 
 
 router.get('/*',function (req, res) {
     const requrl = req.url
-    console.log(req.url)
-    // const testvideofile = "1630760304549-Object-Detection-0-2021-04-09-19.45.17.mp4"; 
     const filepath = path.resolve(__basedir + "/resources/upload/" + requrl) ; 
     const stat = fs.statSync(filepath);
     const fileSize = stat.size;
@@ -38,7 +37,6 @@ router.get('/*',function (req, res) {
         file.pipe(res);
         // console.log(head);
     } else {
-        console.log("ส่วน 2");
         const head = {
             'Content-Length' : fileSize,
             'Content-Type' : 'video/mp4'
@@ -48,6 +46,5 @@ router.get('/*',function (req, res) {
     } 
 })
  
-
 
 module.exports = router;
